@@ -1,766 +1,1672 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DurianDirect - ตลาดเครื่องจักรและอุปกรณ์การเกษตรมือสอง</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Sarabun', sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriMarket — ตลาดรถและอุปกรณ์การเกษตรมือสอง</title>
 
-        body {
-            background-color: #f4f6f0;
-            color: #2c3e50;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif']
+          },
+          colors: {
+            farm: {
+              50: '#f2fbf4',
+              100: '#dff6e4',
+              500: '#16a34a',
+              600: '#15803d',
+              700: '#166534',
+              800: '#14532d',
+              900: '#052e16'
+            }
+          },
+          boxShadow: {
+            soft: '0 10px 35px rgba(15, 23, 42, 0.08)',
+            card: '0 18px 50px rgba(15, 23, 42, 0.10)'
+          }
         }
+      }
+    }
+  </script>
 
-        .phone-mockup {
-            width: 100%;
-            max-width: 420px;
-            height: 850px;
-            background-color: #ffffff;
-            border-radius: 36px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 10px solid #2d3748;
-            position: relative;
-        }
+  <!-- Prompt Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        /* Status Bar */
-        .status-bar {
-            background-color: #1b5e20;
-            color: #ffffff;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 15px;
-            font-weight: 600;
-        }
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-        .status-bar span {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Navigation Bar */
-        .navbar {
-            background-color: #2e7d32;
-            color: #ffffff;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .navbar h1 {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .btn-nav-sell {
-            background-color: #ff8f00;
-            color: #ffffff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 24px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            min-height: 48px;
-            min-width: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: background 0.2s;
-        }
-
-        .btn-nav-sell:hover {
-            background-color: #e68100;
-        }
-
-        /* Screen Container */
-        .screen-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            background-color: #f9fafb;
-            display: none;
-        }
-
-        .screen-container.active {
-            display: block;
-        }
-
-        /* Search Section */
-        .search-box {
-            margin-bottom: 16px;
-        }
-
-        .search-box input {
-            width: 100%;
-            height: 52px;
-            padding: 0 16px;
-            font-size: 18px;
-            border: 2px solid #c8e6c9;
-            border-radius: 12px;
-            background-color: #ffffff;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .search-box input:focus {
-            border-color: #2e7d32;
-        }
-
-        /* Product Cards */
-        .product-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .product-card:active {
-            transform: scale(0.98);
-        }
-
-        .product-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background-color: #e0e0e0;
-        }
-
-        .product-info {
-            padding: 16px;
-        }
-
-        .product-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1b5e20;
-            margin-bottom: 4px;
-        }
-
-        .product-price {
-            font-size: 22px;
-            font-weight: 700;
-            color: #e65100;
-            margin-bottom: 8px;
-        }
-
-        .product-meta {
-            font-size: 16px;
-            color: #555555;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .badge-status {
-            display: inline-block;
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-top: 8px;
-        }
-
-        /* Detail Screen Specifics */
-        .detail-img-container {
-            position: relative;
-            width: 100%;
-            height: 240px;
-        }
-
-        .detail-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .detail-section {
-            background: #ffffff;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            border: 1px solid #e0e0e0;
-        }
-
-        .detail-section h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1b5e20;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #e8f5e9;
-            padding-bottom: 6px;
-        }
-
-        .detail-row {
-            font-size: 17px;
-            color: #333333;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .detail-row span:first-child {
-            font-weight: 600;
-            color: #555555;
-        }
-
-        /* Footer Action Button */
-        .action-footer {
-            padding: 16px;
-            background-color: #ffffff;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-primary {
-            flex: 1;
-            background-color: #2e7d32;
-            color: #ffffff;
-            border: none;
-            height: 52px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
-            min-height: 48px;
-        }
-
-        .btn-primary:hover {
-            background-color: #1b5e20;
-        }
-
-        .btn-secondary {
-            background-color: #e0e0e0;
-            color: #333333;
-            border: none;
-            padding: 0 20px;
-            height: 52px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            min-height: 48px;
-        }
-
-        /* Form Screen Specifics */
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 17px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 6px;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            height: 52px;
-            padding: 0 16px;
-            font-size: 17px;
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            background-color: #ffffff;
-            outline: none;
-        }
-
-        .form-group input[type="file"] {
-            padding: 10px;
-            font-size: 16px;
-            height: 56px;
-            background-color: #fafafa;
-            cursor: pointer;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            border-color: #2e7d32;
-        }
-
-        .form-hint {
-            font-size: 14px;
-            color: #e65100;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        /* Navigation Tab Bar at bottom */
-        .bottom-tabs {
-            background-color: #ffffff;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            height: 64px;
-        }
-
-        .tab-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: #757575;
-            min-height: 48px;
-        }
-
-        .tab-item.active {
-            color: #2e7d32;
-            background-color: #f1f8e9;
-        }
-    </style>
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Prompt', sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(22,163,74,.08), transparent 30%),
+        radial-gradient(circle at 90% 15%, rgba(234,179,8,.07), transparent 26%),
+        #f8fafc;
+    }
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .heart-active { color: #ef4444; fill: #ef4444; }
+    .modal-backdrop { backdrop-filter: blur(4px); }
+    .listing-image-preview img { object-fit: cover; }
+  </style>
 </head>
-<body>
 
-<div class="phone-mockup">
-    <!-- Status Bar -->
-    <div class="status-bar">
-        <span>DurianDirect MVP</span>
-        <span id="network-status">🟢 ออนไลน์</span>
+<body class="text-slate-800">
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
+      <div class="h-16 flex items-center justify-between gap-4">
+        <a href="#" class="flex items-center gap-3 min-w-max">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-farm-500 to-farm-800 text-white grid place-items-center shadow-lg shadow-green-900/10">
+            <i data-lucide="tractor" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="font-bold text-lg leading-none">Agri<span class="text-farm-600">Market</span></div>
+            <div class="text-[10px] text-slate-500 mt-1">ตลาดรถเกษตรมือสอง</div>
+          </div>
+        </a>
+
+        <nav class="hidden lg:flex items-center gap-1">
+          <a href="#home" class="nav-link px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-farm-700 hover:bg-farm-50">หน้าแรก</a>
+          <a href="#products" class="nav-link px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-farm-700 hover:bg-farm-50">ค้นหารถ</a>
+          <a href="#categories" class="nav-link px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-farm-700 hover:bg-farm-50">หมวดหมู่</a>
+          <a href="#how" class="nav-link px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-farm-700 hover:bg-farm-50">วิธีใช้งาน</a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openSellerDashboard()" class="hidden md:flex items-center gap-2 px-3 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition text-sm font-medium" title="แดชบอร์ดผู้ขาย">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            แดชบอร์ดผู้ขาย
+          </button>
+          <button onclick="showToast('ยังไม่มีการแจ้งเตือนใหม่')" class="relative w-10 h-10 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-600 hover:text-amber-500 grid place-items-center transition" title="การแจ้งเตือนการค้นหาที่บันทึกไว้">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span id="savedSearchCount" class="absolute -top-1 -right-1 hidden min-w-4 h-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-bold items-center justify-center">0</span>
+          </button>
+          <button onclick="showToast('เปิดรายการโปรดแล้ว')" class="relative w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-500 grid place-items-center transition" title="รายการโปรด">
+            <i data-lucide="heart" class="w-5 h-5"></i>
+            <span id="favoriteCount" class="absolute -top-1 -right-1 hidden min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold items-center justify-center">0</span>
+          </button>
+          <div id="authArea" class="hidden sm:flex items-center gap-2">
+            <button id="loginButton" onclick="openModal('loginModal')" class="flex items-center gap-2 px-4 h-10 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition text-sm font-medium">
+              <i data-lucide="user-round" class="w-4 h-4"></i>
+              เข้าสู่ระบบ
+            </button>
+            <div id="userMenu" class="hidden items-center gap-2">
+              <div class="hidden md:flex items-center gap-2 px-3 h-10 rounded-xl bg-green-50 border border-green-100">
+                <div class="w-7 h-7 rounded-lg bg-farm-600 text-white grid place-items-center text-xs font-bold" id="userInitial">U</div>
+                <div class="leading-tight max-w-36">
+                  <div id="userDisplayName" class="text-xs font-semibold text-slate-800 truncate">ผู้ใช้งาน</div>
+                  <div id="userRoleLabel" class="text-[10px] text-slate-500">สมาชิก</div>
+                </div>
+              </div>
+              <button onclick="logout()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 grid place-items-center transition" title="ออกจากระบบ">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <button onclick="requireAuthForListing()" class="flex items-center gap-2 px-4 h-10 rounded-xl bg-farm-600 text-white hover:bg-farm-700 transition text-sm font-semibold shadow-lg shadow-green-900/10">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">ลงประกาศขาย</span>
+            <span class="sm:hidden">ขาย</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="home" class="relative overflow-hidden bg-slate-950">
+    <div class="absolute inset-0 hero-grid opacity-80"></div>
+    <div class="absolute -top-32 -right-20 w-96 h-96 bg-farm-500/25 blur-3xl rounded-full"></div>
+    <div class="absolute -bottom-40 -left-20 w-[30rem] h-[30rem] bg-yellow-500/10 blur-3xl rounded-full"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 lg:px-6 pt-14 pb-16 lg:pt-20 lg:pb-24">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-3 py-1.5 text-xs text-green-100 mb-5">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          ตลาดซื้อขายรถเกษตรมือสองที่คัดกรองผู้ขาย
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.15]">
+          รถเกษตรดี ๆ
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-lime-300"> อยู่ใกล้กว่าที่คิด</span>
+        </h1>
+        <p class="mt-5 text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl">
+          ค้นหารถไถ รถเกี่ยว โดรน และอุปกรณ์การเกษตรมือสองจากเจ้าของและร้านค้าที่ตรวจสอบแล้ว
+          พร้อมข้อมูลสภาพรถ ราคา และตำแหน่งสินค้าในที่เดียว
+        </p>
+      </div>
+
+      <!-- Search Box -->
+      <div class="mt-9 max-w-5xl">
+        <div class="p-2 bg-white rounded-2xl shadow-2xl flex flex-col lg:flex-row gap-2">
+          <div class="flex-1 flex items-center gap-3 px-4 h-12 border-b lg:border-b-0 lg:border-r border-slate-200">
+            <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+            <input id="heroSearch" oninput="syncSearch(this.value)" type="text" placeholder="ค้นหา เช่น Kubota L4018, รถเกี่ยว, โดรน..." class="w-full outline-none text-sm text-slate-800 placeholder:text-slate-400">
+          </div>
+          <select id="heroCategory" onchange="applyFilters()" class="h-12 lg:w-48 px-4 rounded-xl bg-slate-50 outline-none text-sm text-slate-700">
+            <option value="all">ทุกหมวดหมู่</option>
+            <option value="tractor">รถแทรกเตอร์</option>
+            <option value="harvester">รถเกี่ยว</option>
+            <option value="drone">โดรนการเกษตร</option>
+            <option value="implement">อุปกรณ์ต่อพ่วง</option>
+            <option value="pump">เครื่องสูบน้ำ</option>
+            <option value="transport">รถขนส่ง</option>
+          </select>
+          <select id="heroProvince" onchange="applyFilters()" class="h-12 lg:w-48 px-4 rounded-xl bg-slate-50 outline-none text-sm text-slate-700">
+            <option value="all">ทุกจังหวัด</option>
+            <option>พิษณุโลก</option>
+            <option>นครสวรรค์</option>
+            <option>กำแพงเพชร</option>
+            <option>เชียงใหม่</option>
+            <option>นครราชสีมา</option>
+            <option>สุพรรณบุรี</option>
+          </select>
+          <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})" class="h-12 px-7 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold flex items-center justify-center gap-2 transition">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            ค้นหา
+          </button>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+          <span>ค้นหายอดนิยม:</span>
+          <button onclick="quickSearch('Kubota')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300">Kubota</button>
+          <button onclick="quickSearch('Yanmar')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300">Yanmar</button>
+          <button onclick="quickSearch('รถเกี่ยว')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300">รถเกี่ยวข้าว</button>
+          <button onclick="quickSearch('โดรน')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300">โดรน</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10 max-w-5xl">
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <div class="text-2xl font-bold text-white">8,420+</div>
+          <div class="text-xs text-slate-400 mt-1">ประกาศทั้งหมด</div>
+        </div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <div class="text-2xl font-bold text-white">3,180+</div>
+          <div class="text-xs text-slate-400 mt-1">ผู้ขายยืนยันตัวตน</div>
+        </div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <div class="text-2xl font-bold text-white">76 จังหวัด</div>
+          <div class="text-xs text-slate-400 mt-1">ครอบคลุมทั่วไทย</div>
+        </div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <div class="text-2xl font-bold text-white">4.8/5</div>
+          <div class="text-xs text-slate-400 mt-1">คะแนนจากผู้ใช้งาน</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section id="categories" class="max-w-7xl mx-auto px-4 lg:px-6 py-12">
+    <div class="flex items-end justify-between gap-4 mb-5">
+      <div>
+        <span class="text-xs font-semibold text-farm-600 uppercase tracking-wider">Browse by category</span>
+        <h2 class="text-2xl lg:text-3xl font-bold text-slate-900 mt-1">เลือกตามประเภทงาน</h2>
+      </div>
+      <button onclick="resetFilters()" class="text-sm text-slate-500 hover:text-farm-700">ล้างตัวกรอง</button>
     </div>
 
-    <!-- Navigation Header -->
-    <div class="navbar">
-        <h1 id="nav-title">ตลาดเครื่องจักรเกษตร</h1>
-        <button class="btn-nav-sell" id="nav-action-btn" onclick="switchScreen('create')">+ ลงขาย</button>
+    <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+      <button onclick="chooseCategory('tractor')" class="category-card min-w-[150px] bg-white rounded-2xl border border-slate-200 p-4 hover:border-green-300 hover:-translate-y-1 transition shadow-soft text-left">
+        <div class="w-12 h-12 rounded-xl bg-green-50 text-farm-700 grid place-items-center mb-3"><i data-lucide="tractor"></i></div>
+        <div class="font-semibold text-sm">รถแทรกเตอร์</div>
+        <div class="text-xs text-slate-400 mt-1">2,430 รายการ</div>
+      </button>
+      <button onclick="chooseCategory('harvester')" class="category-card min-w-[150px] bg-white rounded-2xl border border-slate-200 p-4 hover:border-yellow-300 hover:-translate-y-1 transition shadow-soft text-left">
+        <div class="w-12 h-12 rounded-xl bg-yellow-50 text-yellow-700 grid place-items-center mb-3"><i data-lucide="wheat"></i></div>
+        <div class="font-semibold text-sm">รถเกี่ยว</div>
+        <div class="text-xs text-slate-400 mt-1">980 รายการ</div>
+      </button>
+      <button onclick="chooseCategory('drone')" class="category-card min-w-[150px] bg-white rounded-2xl border border-slate-200 p-4 hover:border-sky-300 hover:-translate-y-1 transition shadow-soft text-left">
+        <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-700 grid place-items-center mb-3"><i data-lucide="send"></i></div>
+        <div class="font-semibold text-sm">โดรนการเกษตร</div>
+        <div class="text-xs text-slate-400 mt-1">620 รายการ</div>
+      </button>
+      <button onclick="chooseCategory('implement')" class="category-card min-w-[150px] bg-white rounded-2xl border border-slate-200 p-4 hover:border-orange-300 hover:-translate-y-1 transition shadow-soft text-left">
+        <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-700 grid place-items-center mb-3"><i data-lucide="wrench"></i></div>
+        <div class="font-semibold text-sm">อุปกรณ์ต่อพ่วง</div>
+        <div class="text-xs text-slate-400 mt-1">1,540 รายการ</div>
+      </button>
+      <button onclick="chooseCategory('pump')" class="category-card min-w-[150px] bg-white rounded-2xl border border-slate-200 p-4 hover:border-cyan-300 hover:-translate-y-1 transition shadow-soft text-left">
+        <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-700 grid place-items-center mb-3"><i data-lucide="waves"></i></div>
+        <div class="font-semibold text-sm">เครื่องสูบน้ำ</div>
+        <div class="text-xs text-slate-400 mt-1">740 รายการ</div>
+      </button>
+      <button onclick="chooseCategory('transport')" class="category-card min-w-[150px] bg-white rounded-2xl border border-slate-200 p-4 hover:border-purple-300 hover:-translate-y-1 transition shadow-soft text-left">
+        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 grid place-items-center mb-3"><i data-lucide="truck"></i></div>
+        <div class="font-semibold text-sm">รถขนส่ง</div>
+        <div class="text-xs text-slate-400 mt-1">390 รายการ</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- Hot Deals -->
+  <section class="max-w-7xl mx-auto px-4 lg:px-6 pb-4">
+    <div class="rounded-3xl overflow-hidden bg-gradient-to-r from-farm-900 via-farm-800 to-slate-900">
+      <div class="p-6 lg:p-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-white/10 grid place-items-center text-amber-300">
+            <i data-lucide="flame" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <div class="text-amber-300 text-sm font-semibold">DEAL OF THE DAY</div>
+            <div class="text-xl font-bold text-white">ดีลรถเกษตรราคาพิเศษ</div>
+            <div class="text-sm text-slate-300 mt-1">ราคาพิเศษจากผู้ขายที่ร่วมรายการ</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-xl bg-white/10 text-white grid place-items-center font-bold" id="hh">05</div>
+            <div class="text-[10px] text-slate-400 mt-1">ชม.</div>
+          </div>
+          <span class="text-white/60 font-bold">:</span>
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-xl bg-white/10 text-white grid place-items-center font-bold" id="mm">42</div>
+            <div class="text-[10px] text-slate-400 mt-1">นาที</div>
+          </div>
+          <span class="text-white/60 font-bold">:</span>
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-xl bg-white/10 text-white grid place-items-center font-bold" id="ss">18</div>
+            <div class="text-[10px] text-slate-400 mt-1">วินาที</div>
+          </div>
+        </div>
+        <button onclick="quickSearch('Kubota L4018')" class="px-5 h-11 rounded-xl bg-white text-farm-800 font-semibold hover:bg-green-50 transition">
+          ดูดีลทั้งหมด
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section id="products" class="max-w-7xl mx-auto px-4 lg:px-6 py-12">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
+      <div>
+        <span class="text-xs font-semibold text-farm-600 uppercase tracking-wider">Marketplace</span>
+        <h2 class="text-2xl lg:text-3xl font-bold text-slate-900 mt-1">รถและอุปกรณ์แนะนำ</h2>
+        <p id="resultText" class="text-sm text-slate-500 mt-1">พบ 8 รายการ</p>
+      </div>
+      <div class="flex gap-2">
+        <select id="sortSelect" onchange="applyFilters()" class="h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm">
+          <option value="recommended">แนะนำ</option>
+          <option value="priceAsc">ราคาต่ำ → สูง</option>
+          <option value="priceDesc">ราคาสูง → ต่ำ</option>
+          <option value="newest">ลงประกาศล่าสุด</option>
+        </select>
+        <button onclick="toggleAdvanced()" class="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-sm font-medium flex items-center gap-2">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+          ตัวกรอง
+        </button>
+        <button onclick="saveCurrentSearch()" class="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-sm font-medium flex items-center gap-2" title="บันทึกการค้นหานี้ไว้รับแจ้งเตือนเมื่อมีสินค้าใหม่">
+          <i data-lucide="bell-plus" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">แจ้งเตือนเมื่อมีของใหม่</span>
+        </button>
+      </div>
     </div>
 
-    <!-- SCREEN 1: PRODUCT LIST -->
-    <div id="screen-list" class="screen-container active">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 ค้นหายี่ห้อ, รุ่น, ประเภท..." oninput="filterProducts()">
+    <!-- Advanced Filters -->
+    <div id="advancedFilters" class="hidden mb-6 p-5 rounded-2xl bg-white border border-slate-200 shadow-soft">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="text-xs font-medium text-slate-500">ราคาสูงสุด</label>
+          <select id="priceFilter" onchange="applyFilters()" class="mt-1 w-full h-10 rounded-xl border border-slate-200 px-3 text-sm">
+            <option value="all">ทุกช่วงราคา</option>
+            <option value="100000">ไม่เกิน 100,000</option>
+            <option value="250000">ไม่เกิน 250,000</option>
+            <option value="500000">ไม่เกิน 500,000</option>
+            <option value="1000000">ไม่เกิน 1,000,000</option>
+          </select>
         </div>
-        
-        <div id="product-list-content">
-            <!-- Rendered by JavaScript -->
+        <div>
+          <label class="text-xs font-medium text-slate-500">สภาพสินค้า</label>
+          <select id="conditionFilter" onchange="applyFilters()" class="mt-1 w-full h-10 rounded-xl border border-slate-200 px-3 text-sm">
+            <option value="all">ทั้งหมด</option>
+            <option value="excellent">ดีมาก</option>
+            <option value="good">ดี</option>
+            <option value="fair">ใช้งานได้ / มีตำหนิ</option>
+          </select>
         </div>
+        <div>
+          <label class="text-xs font-medium text-slate-500">ยี่ห้อ</label>
+          <select id="brandFilter" onchange="applyFilters()" class="mt-1 w-full h-10 rounded-xl border border-slate-200 px-3 text-sm">
+            <option value="all">ทุกยี่ห้อ</option>
+            <option value="Kubota">Kubota</option>
+            <option value="Yanmar">Yanmar</option>
+            <option value="John Deere">John Deere</option>
+            <option value="DJI">DJI</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-500">พื้นที่</label>
+          <select id="locationFilter" onchange="applyFilters()" class="mt-1 w-full h-10 rounded-xl border border-slate-200 px-3 text-sm">
+            <option value="all">ทั่วประเทศ</option>
+            <option>พิษณุโลก</option>
+            <option>นครสวรรค์</option>
+            <option>กำแพงเพชร</option>
+            <option>เชียงใหม่</option>
+            <option>นครราชสีมา</option>
+            <option>สุพรรณบุรี</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <!-- SCREEN 2: PRODUCT DETAIL -->
-    <div id="screen-detail" class="screen-container">
-        <div id="product-detail-content">
-            <!-- Rendered by JavaScript -->
-        </div>
-        <div class="action-footer">
-            <button class="btn-secondary" onclick="switchScreen('list')">ย้อนกลับ</button>
-            <button class="btn-primary" onclick="handleBuyAction()">ติดต่อซื้อ / ทำสัญญา</button>
-        </div>
+    <div id="productGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+
+    <div id="emptyState" class="hidden py-20 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 mx-auto grid place-items-center text-slate-400">
+        <i data-lucide="search-x" class="w-7 h-7"></i>
+      </div>
+      <h3 class="font-semibold text-lg mt-4">ไม่พบสินค้าที่ตรงกับเงื่อนไข</h3>
+      <p class="text-sm text-slate-500 mt-1">ลองเปลี่ยนคำค้นหาหรือปรับตัวกรองอีกครั้ง</p>
+      <button onclick="resetFilters()" class="mt-4 px-4 h-10 rounded-xl bg-farm-600 text-white text-sm font-medium">ล้างตัวกรอง</button>
     </div>
+  </section>
 
-    <!-- SCREEN 3: CREATE PRODUCT (MAX 6 FIELDS) -->
-    <div id="screen-create" class="screen-container">
-        <div style="margin-bottom: 16px;">
-            <h2 style="color: #1b5e20; font-size: 22px; font-weight: 700;">ลงประกาศขายอุปกรณ์</h2>
-            <p style="color: #666; font-size: 15px;">กรอกข้อมูลกระชับภายใน 3 นาที (ไม่เกิน 6 ช่อง)</p>
+  <!-- Compare strip -->
+  <section class="max-w-7xl mx-auto px-4 lg:px-6 pb-12">
+    <div class="rounded-3xl border border-slate-200 bg-white p-6 lg:p-8 shadow-soft">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+          <div class="flex items-center gap-2 text-farm-700 font-semibold">
+            <i data-lucide="scale" class="w-5 h-5"></i>
+            เปรียบเทียบรถก่อนตัดสินใจ
+          </div>
+          <h3 class="text-2xl font-bold mt-1">เลือก 2 รุ่นแล้วเทียบสเปกแบบชัด ๆ</h3>
+          <p class="text-sm text-slate-500 mt-1">ราคา ปีใช้งาน ชั่วโมงเครื่อง แรงม้า และคะแนนสภาพ</p>
         </div>
+        <button onclick="openCompare()" class="px-5 h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-semibold flex items-center gap-2">
+          เปิดตัวเปรียบเทียบ
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </section>
 
-        <form id="createForm" onsubmit="submitProduct(event)">
-            <div class="form-group">
-                <label>1. ยี่ห้ออุปกรณ์ *</label>
-                <input type="text" id="f_brand" placeholder="เช่น Kubota, Yanmar" required>
-            </div>
+  <!-- Why AgriMarket -->
+  <section id="how" class="border-y border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-14">
+      <div class="text-center max-w-2xl mx-auto">
+        <span class="text-xs font-semibold text-farm-600 uppercase tracking-wider">Why AgriMarket</span>
+        <h2 class="text-2xl lg:text-3xl font-bold text-slate-900 mt-1">ซื้อขายง่าย และมั่นใจกว่า</h2>
+        <p class="text-slate-500 text-sm mt-2">ออกแบบมาเพื่อคนทำเกษตร ร้านค้า และผู้ซื้อเครื่องจักรโดยเฉพาะ</p>
+      </div>
 
-            <div class="form-group">
-                <label>2. รุ่น *</label>
-                <input type="text" id="f_model" placeholder="เช่น L4018, EF494T" required>
-            </div>
+      <div class="grid md:grid-cols-3 gap-5 mt-9">
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="w-12 h-12 rounded-xl bg-green-50 text-farm-700 grid place-items-center">
+            <i data-lucide="badge-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-semibold mt-4">ผู้ขายยืนยันตัวตน</h3>
+          <p class="text-sm text-slate-500 mt-2 leading-relaxed">มีสถานะผู้ขายที่ผ่านการยืนยัน พร้อมคะแนนและรีวิวจากการซื้อขายที่ผ่านมา</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 grid place-items-center">
+            <i data-lucide="gauge" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-semibold mt-4">คะแนนสภาพรถ 0–100</h3>
+          <p class="text-sm text-slate-500 mt-2 leading-relaxed">ดูข้อมูลเครื่องยนต์ ยาง ไฮดรอลิก ระบบไฟ และจุดที่มีตำหนิได้ในหน้าเดียว</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 hover:shadow-soft transition">
+          <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-700 grid place-items-center">
+            <i data-lucide="messages-square" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-semibold mt-4">คุย นัดดู และซื้อขาย</h3>
+          <p class="text-sm text-slate-500 mt-2 leading-relaxed">แชตกับผู้ขาย นัดดูสินค้า แชร์ตำแหน่ง และต่อยอดสู่บริการขนส่งได้</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            <div class="form-group">
-                <label>3. ราคา (บาท) *</label>
-                <input type="number" id="f_price" placeholder="เช่น 280000" required>
-            </div>
+  <!-- Seller CTA -->
+  <section class="max-w-7xl mx-auto px-4 lg:px-6 py-12">
+    <div class="rounded-3xl overflow-hidden bg-gradient-to-br from-green-700 to-green-950 text-white">
+      <div class="p-7 lg:p-10 grid lg:grid-cols-[1fr_auto] items-center gap-8">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs text-green-100">
+            <i data-lucide="store" class="w-3.5 h-3.5"></i>
+            สำหรับเจ้าของรถและร้านค้า
+          </div>
+          <h2 class="text-2xl lg:text-3xl font-bold mt-4">มีรถหรืออุปกรณ์ไม่ได้ใช้งาน?</h2>
+          <p class="text-green-100 text-sm mt-2 max-w-2xl leading-relaxed">
+            ลงประกาศพร้อมรูปหลายมุม ใส่ข้อมูลสภาพรถ ตั้งราคา และรับข้อความจากผู้ซื้อได้ทันที
+          </p>
+        </div>
+        <button onclick="requireAuthForListing()" class="px-6 h-12 rounded-xl bg-white text-green-800 font-semibold hover:bg-green-50 transition flex items-center justify-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          เริ่มลงประกาศ
+        </button>
+      </div>
+    </div>
+  </section>
 
-            <div class="form-group">
-                <label>4. ประเภทอุปกรณ์ *</label>
-                <select id="f_category" required>
-                    <option value="">-- เลือกประเภท --</option>
-                    <option value="รถแทรกเตอร์">รถแทรกเตอร์</option>
-                    <option value="รถเกี่ยวข้าว">รถเกี่ยวข้าว</option>
-                    <option value="เครื่องสูบน้ำ">เครื่องสูบน้ำ</option>
-                    <option value="เครื่องพ่นยา">เครื่องพ่นยา</option>
-                    <option value="อื่นๆ">อื่นๆ</option>
-                </select>
-            </div>
+  <!-- Footer -->
+  <footer class="bg-slate-950 text-slate-300">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-12">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-3 text-white">
+            <div class="w-10 h-10 rounded-2xl bg-farm-600 grid place-items-center"><i data-lucide="tractor"></i></div>
+            <div class="font-bold text-xl">AgriMarket</div>
+          </div>
+          <p class="text-sm text-slate-400 mt-4 max-w-md leading-relaxed">
+            แพลตฟอร์มซื้อขายรถและอุปกรณ์การเกษตรมือสองสำหรับเกษตรกรและผู้ประกอบการทั่วประเทศไทย
+          </p>
+        </div>
+        <div>
+          <div class="font-semibold text-white">เมนู</div>
+          <div class="space-y-2 mt-4 text-sm">
+            <a href="#products" class="block hover:text-white">ค้นหารถ</a>
+            <a href="#categories" class="block hover:text-white">หมวดหมู่</a>
+            <a href="#how" class="block hover:text-white">วิธีใช้งาน</a>
+            <button onclick="requireAuthForListing()" class="hover:text-white">ลงประกาศขาย</button>
+          </div>
+        </div>
+        <div>
+          <div class="font-semibold text-white">ช่วยเหลือ</div>
+          <div class="space-y-2 mt-4 text-sm">
+            <a href="#" onclick="showToast('ศูนย์ช่วยเหลือกำลังพัฒนา'); return false;" class="block hover:text-white">ศูนย์ช่วยเหลือ</a>
+            <a href="#" onclick="showToast('นโยบายความปลอดภัยกำลังพัฒนา'); return false;" class="block hover:text-white">ความปลอดภัย</a>
+            <a href="#" onclick="showToast('ติดต่อทีมงานผ่านแชตได้เร็ว ๆ นี้'); return false;" class="block hover:text-white">ติดต่อเรา</a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-white/10 mt-10 pt-6 text-xs text-slate-500 flex flex-col sm:flex-row justify-between gap-2">
+        <div>© 2026 AgriMarket. Demo Marketplace UI</div>
+        <div>ซื้อขายอย่างมีสติ ตรวจสอบสินค้าและผู้ขายก่อนโอนเงิน</div>
+      </div>
+    </div>
+  </footer>
 
-            <div class="form-group">
-                <label>5. เลขทะเบียน / เลขซีเรียลเครื่องจักร *</label>
-                <input type="text" id="f_serial" placeholder="ระบุเพื่อตรวจสอบย้อนกลับและทำสัญญา" required>
-                <div class="form-hint">⚠️ จำเป็นตามกฎหมายสัญญาซื้อขายและกรมการขนส่ง</div>
-            </div>
+  <!-- Product Detail Modal -->
+  <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('detailModal')"></div>
+    <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card">
+      <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-xl bg-white/90 border border-slate-200 grid place-items-center hover:bg-slate-50">
+        <i data-lucide="x"></i>
+      </button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
 
-            <div class="form-group">
-                <label>6. รูปถ่ายอุปกรณ์จากคลัง (เลือกรูปภาพ) *</label>
-                <input type="file" id="f_image" accept="image/*" required>
-                <div class="form-hint">📁 รองรับการเลือกรูปภาพจากเครื่องหรือถ่ายรูปใหม่</div>
-            </div>
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('loginModal')"></div>
+    <div class="relative w-full max-w-md bg-white rounded-3xl p-7 shadow-card">
+      <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 w-9 h-9 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="x"></i></button>
+      <div class="w-12 h-12 rounded-2xl bg-green-50 text-farm-700 grid place-items-center"><i data-lucide="log-in"></i></div>
+      <h2 class="text-2xl font-bold mt-4">เข้าสู่ระบบ</h2>
+      <p class="text-sm text-slate-500 mt-1">เข้าสู่ระบบเพื่อบันทึกรายการโปรด ติดต่อผู้ขาย และลงประกาศ</p>
 
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="button" class="btn-secondary" style="flex:1;" onclick="switchScreen('list')">ยกเลิก</button>
-                <button type="submit" class="btn-primary" style="flex:2;">ยืนยันลงขายทันที</button>
+      <div id="loginError" class="hidden mt-4 rounded-xl bg-rose-50 border border-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+
+      <form id="loginForm" onsubmit="loginUser(event)" class="space-y-4 mt-6">
+        <div>
+          <label class="text-sm font-medium">อีเมล / เบอร์โทร</label>
+          <input id="loginIdentifier" required autocomplete="username" type="text" placeholder="example@email.com หรือ 0812345678" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+        </div>
+        <div>
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-sm font-medium">รหัสผ่าน</label>
+            <button type="button" onclick="togglePassword('loginPassword', this)" class="text-xs text-farm-700 hover:underline">แสดงรหัสผ่าน</button>
+          </div>
+          <input id="loginPassword" required minlength="6" autocomplete="current-password" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+        </div>
+        <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+          <input id="rememberMe" type="checkbox" class="rounded border-slate-300 text-farm-600 focus:ring-green-200">
+          จดจำการเข้าสู่ระบบบนอุปกรณ์นี้
+        </label>
+        <button class="w-full h-11 rounded-xl bg-farm-600 text-white font-semibold hover:bg-farm-700">เข้าสู่ระบบ</button>
+        <button type="button" onclick="switchAuthModal('loginModal','registerModal')" class="w-full h-11 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50">สร้างบัญชีใหม่</button>
+      </form>
+      <p class="mt-4 text-[11px] leading-relaxed text-slate-400">หมายเหตุ: เวอร์ชัน HTML นี้จัดเก็บบัญชีไว้ในเบราว์เซอร์เครื่องนี้ เหมาะสำหรับต้นแบบหรือใช้งานภายใน ไม่ใช่ระบบยืนยันตัวตนสำหรับเว็บไซต์สาธารณะ</p>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('registerModal')"></div>
+    <div class="relative w-full max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-3xl p-7 shadow-card">
+      <button onclick="closeModal('registerModal')" class="absolute top-4 right-4 w-9 h-9 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="x"></i></button>
+      <div class="w-12 h-12 rounded-2xl bg-green-50 text-farm-700 grid place-items-center"><i data-lucide="user-plus"></i></div>
+      <h2 class="text-2xl font-bold mt-4">สร้างบัญชีใหม่</h2>
+      <p class="text-sm text-slate-500 mt-1">สมัครสมาชิก AgriMarket เพื่อซื้อ ขาย และติดต่อกันได้สะดวกขึ้น</p>
+
+      <div id="registerError" class="hidden mt-4 rounded-xl bg-rose-50 border border-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+
+      <form id="registerForm" onsubmit="registerUser(event)" class="space-y-4 mt-6">
+        <div>
+          <label class="text-sm font-medium">ชื่อ-นามสกุล *</label>
+          <input id="registerName" required minlength="2" autocomplete="name" type="text" placeholder="เช่น สมชาย ใจดี" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+        </div>
+        <div>
+          <label class="text-sm font-medium">ประเภทบัญชี *</label>
+          <select id="registerRole" required class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 outline-none focus:ring-2 focus:ring-green-100">
+            <option value="buyer">ผู้ซื้อ / เกษตรกร</option>
+            <option value="seller">ผู้ขาย / เจ้าของรถ</option>
+            <option value="shop">ร้านค้า / ผู้ประกอบการ</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium">อีเมล *</label>
+          <input id="registerEmail" required autocomplete="email" type="email" placeholder="example@email.com" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+        </div>
+        <div>
+          <label class="text-sm font-medium">เบอร์โทร *</label>
+          <input id="registerPhone" required inputmode="numeric" autocomplete="tel" type="tel" placeholder="0812345678" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium">รหัสผ่าน *</label>
+            <input id="registerPassword" required minlength="6" autocomplete="new-password" type="password" placeholder="อย่างน้อย 6 ตัว" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+          </div>
+          <div>
+            <label class="text-sm font-medium">ยืนยันรหัสผ่าน *</label>
+            <input id="registerConfirmPassword" required minlength="6" autocomplete="new-password" type="password" placeholder="กรอกอีกครั้ง" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
+          </div>
+        </div>
+        <label class="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
+          <input id="registerTerms" required type="checkbox" class="mt-0.5 rounded border-slate-300 text-farm-600 focus:ring-green-200">
+          <span>ฉันยอมรับเงื่อนไขการใช้งาน และจะตรวจสอบข้อมูลสินค้า/คู่ค้าก่อนทำธุรกรรม</span>
+        </label>
+        <button class="w-full h-11 rounded-xl bg-farm-600 text-white font-semibold hover:bg-farm-700">สมัครสมาชิก</button>
+        <button type="button" onclick="switchAuthModal('registerModal','loginModal')" class="w-full h-11 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50">มีบัญชีแล้ว — เข้าสู่ระบบ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Listing Modal -->
+  <div id="listingModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('listingModal')"></div>
+    <div class="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-white rounded-3xl shadow-card">
+      <button onclick="closeModal('listingModal')" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-xl bg-white border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+      <div class="p-7">
+        <div class="w-12 h-12 rounded-2xl bg-green-50 text-farm-700 grid place-items-center"><i data-lucide="badge-plus"></i></div>
+        <h2 class="text-2xl font-bold mt-4">ลงประกาศขาย</h2>
+        <p class="text-sm text-slate-500 mt-1">กรอกข้อมูลเบื้องต้น แล้วระบบจะสร้างแบบร่างประกาศให้</p>
+
+        <form id="listingForm" onsubmit="submitListing(event)" class="mt-6 space-y-5">
+          <input type="hidden" name="listingId" id="listingId">
+          <div id="listingFormError" class="hidden rounded-xl bg-rose-50 border border-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="text-sm font-medium">ชื่อสินค้า *</label>
+              <input required name="title" maxlength="100" placeholder="เช่น Kubota L4018 ปี 2021" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100">
             </div>
+            <div>
+              <label class="text-sm font-medium">หมวดหมู่ *</label>
+              <select required name="category" id="listingCategory" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3">
+                <option value="tractor">รถแทรกเตอร์</option><option value="harvester">รถเกี่ยว</option><option value="drone">โดรนการเกษตร</option><option value="implement">อุปกรณ์ต่อพ่วง</option><option value="pump">เครื่องสูบน้ำ</option><option value="transport">รถขนส่ง</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium">ยี่ห้อ *</label>
+              <input required name="brand" maxlength="50" placeholder="เช่น Kubota" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4">
+            </div>
+            <div>
+              <label class="text-sm font-medium">ราคา (บาท) *</label>
+              <input required name="price" type="number" min="1" max="999999999" placeholder="250000" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4">
+            </div>
+            <div>
+              <label class="text-sm font-medium">จังหวัด *</label>
+              <select required name="province" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3">
+                <option>พิษณุโลก</option><option>นครสวรรค์</option><option>กำแพงเพชร</option><option>เชียงใหม่</option><option>นครราชสีมา</option><option>สุพรรณบุรี</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium">สภาพสินค้า *</label>
+              <select required name="condition" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3">
+                <option value="excellent">ดีมาก</option><option value="good">ดี</option><option value="fair">ใช้งานได้ / มีตำหนิ</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium">ปีที่ผลิต</label>
+              <input name="year" type="number" min="1980" max="2026" placeholder="2021" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4">
+            </div>
+            <div>
+              <label class="text-sm font-medium">ชั่วโมงใช้งาน</label>
+              <input name="hours" type="number" min="0" max="999999" placeholder="1250" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-sm font-medium">รายละเอียดสินค้า *</label>
+              <textarea required name="desc" maxlength="1500" rows="4" placeholder="บอกสภาพรถ อุปกรณ์ที่แถม จุดตำหนิ ประวัติการซ่อม..." class="mt-1 w-full rounded-xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-green-100"></textarea>
+              <div class="text-[11px] text-slate-400 mt-1 text-right">รายละเอียดช่วยให้ผู้ซื้อประเมินสินค้าได้ง่ายขึ้น</div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-dashed border-slate-300 p-5 bg-slate-50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 grid place-items-center"><i data-lucide="image-plus" class="w-5 h-5 text-slate-500"></i></div>
+              <div>
+                <div class="text-sm font-semibold">รูปภาพสินค้า <span class="text-rose-500">*</span></div>
+                <div class="text-xs text-slate-500 mt-0.5">เลือกได้สูงสุด 8 รูป ระบบจะย่อรูปให้อัตโนมัติเพื่อเก็บในเบราว์เซอร์</div>
+              </div>
+            </div>
+            <input id="listingImages" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple required class="mt-4 text-sm w-full">
+            <div id="listingImagePreview" class="grid grid-cols-4 gap-2 mt-4"></div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal('listingModal')" class="px-5 h-11 rounded-xl border border-slate-200 text-sm font-medium">ยกเลิก</button>
+            <button type="button" onclick="submitListing(event,'draft')" class="px-5 h-11 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm font-semibold">บันทึกแบบร่าง</button>
+            <button type="submit" class="px-6 h-11 rounded-xl bg-farm-600 hover:bg-farm-700 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="send" class="w-4 h-4"></i> ลงประกาศทันที
+            </button>
+          </div>
         </form>
+      </div>
     </div>
+  </div>
 
-    <!-- Bottom Tab Navigation -->
-    <div class="bottom-tabs">
-        <button class="tab-item active" id="tab-home" onclick="switchScreen('list')">
-            <span>🏠 ตลาดสินค้า</span>
-        </button>
-        <button class="tab-item" id="tab-sell" onclick="switchScreen('create')">
-            <span>➕ ลงขายด่วน</span>
-        </button>
+  <!-- Compare Modal -->
+  <div id="compareModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('compareModal')"></div>
+    <div class="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+      <button onclick="closeModal('compareModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+      <div class="pr-10">
+        <span class="text-xs text-farm-600 font-semibold">SMART COMPARISON</span>
+        <h2 class="text-2xl font-bold mt-1">เปรียบเทียบรถยอดนิยม</h2>
+      </div>
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full min-w-[700px] text-sm">
+          <thead>
+            <tr class="border-b border-slate-200">
+              <th class="text-left py-3 px-3 text-slate-500 font-medium">ข้อมูล</th>
+              <th class="text-left py-3 px-3">Kubota L4018</th>
+              <th class="text-left py-3 px-3">Yanmar EF393T</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b"><td class="py-3 px-3 text-slate-500">ราคา</td><td class="py-3 px-3 font-semibold">฿250,000</td><td class="py-3 px-3 font-semibold">฿270,000</td></tr>
+            <tr class="border-b"><td class="py-3 px-3 text-slate-500">ปี</td><td class="py-3 px-3">2021</td><td class="py-3 px-3">2022</td></tr>
+            <tr class="border-b"><td class="py-3 px-3 text-slate-500">ชั่วโมงใช้งาน</td><td class="py-3 px-3">1,250 ชม.</td><td class="py-3 px-3">900 ชม.</td></tr>
+            <tr class="border-b"><td class="py-3 px-3 text-slate-500">แรงม้า</td><td class="py-3 px-3">40 HP</td><td class="py-3 px-3">39 HP</td></tr>
+            <tr class="border-b"><td class="py-3 px-3 text-slate-500">คะแนนสภาพ</td><td class="py-3 px-3"><span class="text-green-700 font-bold">92/100</span></td><td class="py-3 px-3"><span class="text-green-700 font-bold">95/100</span></td></tr>
+            <tr><td class="py-3 px-3 text-slate-500">ตำแหน่ง</td><td class="py-3 px-3">พิษณุโลก</td><td class="py-3 px-3">นครสวรรค์</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-    // Seed Data ตัวอย่าง 10 รายการตามบริบทตลาดไทย
-    let products = [
-        {
-            id: "prod-001",
-            brand: "Kubota",
-            model: "L4018",
-            price: 280000,
-            category: "รถแทรกเตอร์",
-            serialNumber: "KB-L4018-9921",
-            chassisNumber: "CHS-883921",
-            engineNumber: "ENG-44210",
-            province: "พิษณุโลก",
-            amphoe: "เมืองพิษณุโลก",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d69204b5f",
-            seller: { name: "คุณลุงสมชาย เกษตรก้าวหน้า", phone: "081-234-5678", isVerified: true }
-        },
-        {
-            id: "prod-002",
-            brand: "Yanmar",
-            model: "EF494T",
-            price: 350000,
-            category: "รถแทรกเตอร์",
-            serialNumber: "YM-EF494-1102",
-            chassisNumber: "CHS-554120",
-            engineNumber: "ENG-99182",
-            province: "นครสวรรค์",
-            amphoe: "ตาคลี",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854",
-            seller: { name: "เจ๊นาง ไร่ข้าวโพดทอง", phone: "089-876-5432", isVerified: true }
-        },
-        {
-            id: "prod-003",
-            brand: "Kubota",
-            model: "DC-70G",
-            price: 450000,
-            category: "รถเกี่ยวข้าว",
-            serialNumber: "KB-DC70-3392",
-            chassisNumber: "CHS-110293",
-            engineNumber: "ENG-77382",
-            province: "สุพรรณบุรี",
-            amphoe: "สองพี่น้อง",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449",
-            seller: { name: "พี่ประเสริฐ เครื่องจักรกล", phone: "085-111-2233", isVerified: false }
-        },
-        {
-            id: "prod-004",
-            brand: "Honda",
-            model: "WB30XT",
-            price: 4500,
-            category: "เครื่องสูบน้ำ",
-            serialNumber: "HD-WB30-5512",
-            chassisNumber: "N/A",
-            engineNumber: "ENG-11234",
-            province: "พิจิตร",
-            amphoe: "ตะพานหิน",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
-            seller: { name: "ผู้ใหญ่สมนึก ชุมแสง", phone: "082-333-4455", isVerified: true }
-        },
-        {
-            id: "prod-005",
-            brand: "MITEC",
-            model: "MT-100",
-            price: 18000,
-            category: "เครื่องพ่นยา",
-            serialNumber: "MT-100-881",
-            chassisNumber: "N/A",
-            engineNumber: "ENG-55612",
-            province: "เชียงใหม่",
-            amphoe: "สันทราย",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d",
-            seller: { name: "พ่อเลี้ยงณรงค์ สวนส้ม", phone: "088-999-0011", isVerified: true }
-        },
-        {
-            id: "prod-006",
-            brand: "Kubota",
-            model: "L5018",
-            price: 390000,
-            category: "รถแทรกเตอร์",
-            serialNumber: "KB-L5018-7711",
-            chassisNumber: "CHS-667182",
-            engineNumber: "ENG-88219",
-            province: "พิษณุโลก",
-            amphoe: "บางระกำ",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d69204b5f",
-            seller: { name: "คุณบุญส่ง นาดี", phone: "084-555-6677", isVerified: true }
-        },
-        {
-            id: "prod-007",
-            brand: "Yanmar",
-            model: "AW70V",
-            price: 420000,
-            category: "รถเกี่ยวข้าว",
-            serialNumber: "YM-AW70-4491",
-            chassisNumber: "CHS-332910",
-            engineNumber: "ENG-33490",
-            province: "เพชรบูรณ์",
-            amphoe: "หล่มสัก",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449",
-            seller: { name: "เจ๊ดา มะขามหวาน", phone: "086-777-8899", isVerified: true }
-        },
-        {
-            id: "prod-008",
-            brand: "Mitsubishi",
-            model: "HD-200",
-            price: 12000,
-            category: "เครื่องยนต์เกษตร",
-            serialNumber: "MS-HD200-221",
-            chassisNumber: "N/A",
-            engineNumber: "ENG-99231",
-            province: "กำแพงเพชร",
-            amphoe: "พรานกระต่าย",
-            status: "SOLD",
-            imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
-            seller: { name: "ลุงมั่นคง คงกระพัน", phone: "087-444-5566", isVerified: false }
-        },
-        {
-            id: "prod-009",
-            brand: "Siam Kubota",
-            model: "KRX-1",
-            price: 85000,
-            category: "รถดำนา",
-            serialNumber: "KB-KRX1-109",
-            chassisNumber: "CHS-441029",
-            engineNumber: "ENG-12093",
-            province: "นครสวรรค์",
-            amphoe: "เก้าเลี้ยว",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854",
-            seller: { name: "คุณวิชัย ทำนาดี", phone: "089-222-3344", isVerified: true }
-        },
-        {
-            id: "prod-010",
-            brand: "NIWA",
-            model: "NW-65",
-            price: 6500,
-            category: "เครื่องตัดหญ้า",
-            serialNumber: "NW-65-992",
-            chassisNumber: "N/A",
-            engineNumber: "ENG-44120",
-            province: "พิจิตร",
-            amphoe: "โพธิ์ประทับช้าง",
-            status: "AVAILABLE",
-            imageUrl: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d",
-            seller: { name: "น้าเดช สวนมะม่วง", phone: "081-999-1122", isVerified: true }
-        }
+  <!-- Chat Modal -->
+  <div id="chatModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('chatModal')"></div>
+    <div class="relative w-full max-w-lg h-[80vh] max-h-[600px] bg-white rounded-3xl shadow-card flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="chatSellerAvatar" class="w-10 h-10 rounded-full bg-green-100 text-green-800 grid place-items-center text-sm font-bold"></div>
+          <div>
+            <div id="chatSellerName" class="text-sm font-semibold"></div>
+            <div id="chatProductTitle" class="text-xs text-slate-400"></div>
+          </div>
+        </div>
+        <button onclick="closeModal('chatModal')" class="w-9 h-9 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="x"></i></button>
+      </div>
+      <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50"></div>
+      <form onsubmit="sendChatMessage(event)" class="p-3 border-t border-slate-100 flex items-center gap-2">
+        <input id="chatInput" type="text" placeholder="พิมพ์ข้อความถึงผู้ขาย..." class="flex-1 h-11 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-green-100 text-sm">
+        <button class="w-11 h-11 rounded-xl bg-farm-600 hover:bg-farm-700 text-white grid place-items-center shrink-0"><i data-lucide="send" class="w-4 h-4"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="reportModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('reportModal')"></div>
+    <div class="relative w-full max-w-md bg-white rounded-3xl p-7 shadow-card">
+      <button onclick="closeModal('reportModal')" class="absolute top-4 right-4 w-9 h-9 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="x"></i></button>
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 grid place-items-center"><i data-lucide="flag"></i></div>
+      <h2 class="text-2xl font-bold mt-4">รายงานประกาศ</h2>
+      <p id="reportProductTitle" class="text-sm text-slate-500 mt-1"></p>
+      <form onsubmit="submitReport(event)" class="space-y-4 mt-6">
+        <div>
+          <label class="text-sm font-medium">เหตุผล</label>
+          <select required name="reason" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm">
+            <option value="">เลือกเหตุผล</option>
+            <option>ข้อมูลสินค้าไม่ตรงกับความเป็นจริง</option>
+            <option>สงสัยว่าเป็นการหลอกลวง</option>
+            <option>ราคาหรือรูปภาพผิดปกติ</option>
+            <option>ผู้ขายไม่ตอบสนอง / พฤติกรรมไม่เหมาะสม</option>
+            <option>อื่น ๆ</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium">รายละเอียดเพิ่มเติม</label>
+          <textarea name="detail" rows="3" placeholder="อธิบายเพิ่มเติม (ถ้ามี)" class="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:ring-2 focus:ring-rose-100"></textarea>
+        </div>
+        <button class="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold">ส่งรายงาน</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Seller Dashboard Modal -->
+  <div id="sellerModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('sellerModal')"></div>
+    <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+      <button onclick="closeModal('sellerModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+      <span class="text-xs text-farm-600 font-semibold">SELLER DASHBOARD</span>
+      <h2 class="text-2xl font-bold mt-1">แดชบอร์ดผู้ขาย</h2>
+      <p class="text-sm text-slate-500 mt-1">ภาพรวมประกาศและการติดต่อของคุณ (ข้อมูลตัวอย่าง)</p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+        <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs text-slate-400">ประกาศทั้งหมด</div><div class="text-2xl font-bold mt-1" id="dashListingCount">0</div></div>
+        <div class="rounded-2xl bg-blue-50 p-4"><div class="text-xs text-blue-500">ยอดเข้าชมรวม</div><div class="text-2xl font-bold text-blue-700 mt-1">1,842</div></div>
+        <div class="rounded-2xl bg-green-50 p-4"><div class="text-xs text-green-600">ข้อความใหม่</div><div class="text-2xl font-bold text-green-700 mt-1">7</div></div>
+        <div class="rounded-2xl bg-amber-50 p-4"><div class="text-xs text-amber-600">คำขอนัดดู</div><div class="text-2xl font-bold text-amber-700 mt-1">3</div></div>
+      </div>
+
+      <div class="mt-6">
+        <div class="font-semibold">ประกาศของฉัน</div>
+        <div id="dashListings" class="space-y-3 mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-[60] translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-slate-900 text-white rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-green-500/20 text-green-300 grid place-items-center"><i data-lucide="check" class="w-4 h-4"></i></div>
+      <div id="toastText" class="text-sm"></div>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      {
+        id:1, title:'Kubota L4018', category:'tractor', categoryLabel:'รถแทรกเตอร์',
+        brand:'Kubota', price:250000, oldPrice:290000, year:2021, hours:1250,
+        province:'พิษณุโลก', condition:'excellent', conditionLabel:'ดีมาก', score:92, seller:'เกษตรรุ่งเรือง',
+        verified:true, rating:4.9, reviews:84, date:8, image:'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80',
+        desc:'รถไถพร้อมใช้งาน เครื่องยนต์ปกติ ระบบไฮดรอลิกดี มีอุปกรณ์ต่อพ่วงให้บางรายการ เหมาะกับงานนาข้าวและไร่ผสม',
+        conditionDetail:{engine:94,tires:85,hydraulics:93,electrical:90}
+      },
+      {
+        id:2, title:'Yanmar EF393T', category:'tractor', categoryLabel:'รถแทรกเตอร์',
+        brand:'Yanmar', price:270000, year:2022, hours:900,
+        province:'นครสวรรค์', condition:'excellent', conditionLabel:'ดีมาก', score:95, seller:'นาโชคแมชชีนเนอรี่',
+        verified:true, rating:4.8, reviews:52, date:7, image:'https://images.unsplash.com/photo-1592982537447-6f3c9f0a3aa7?auto=format&fit=crop&w=900&q=80',
+        desc:'รถปีใหม่ ชั่วโมงใช้งานน้อย สภาพเดิมสวย เครื่องยนต์เดินเรียบ พร้อมตรวจเช็กก่อนส่งมอบ',
+        conditionDetail:{engine:97,tires:93,hydraulics:95,electrical:96}
+      },
+      {
+        id:3, title:'John Deere 5050D', category:'tractor', categoryLabel:'รถแทรกเตอร์',
+        brand:'John Deere', price:450000, year:2020, hours:2100,
+        province:'เชียงใหม่', condition:'good', conditionLabel:'ดี', score:87, seller:'เหนือฟาร์มเทรด',
+        verified:true, rating:4.7, reviews:39, date:6, image:'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=900&q=80',
+        desc:'แรงม้าเหมาะสำหรับสวนและพื้นที่เนิน ใช้งานจริง ดูแลตามระยะ มีประวัติเข้าศูนย์บางรายการ',
+        conditionDetail:{engine:88,tires:80,hydraulics:89,electrical:86}
+      },
+      {
+        id:4, title:'รถเกี่ยวข้าว KUBOTA DC-70', category:'harvester', categoryLabel:'รถเกี่ยว',
+        brand:'Kubota', price:980000, year:2019, hours:3450,
+        province:'กำแพงเพชร', condition:'good', conditionLabel:'ดี', score:84, seller:'รุ่งเรืองการเกษตร',
+        verified:true, rating:4.8, reviews:101, date:5, image:'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=900&q=80',
+        desc:'รถเกี่ยวข้าวสำหรับงานนาขนาดกลาง ผ่านงานตามฤดูกาล ระบบนวดและคัดแยกทำงานปกติ',
+        conditionDetail:{engine:85,tires:78,hydraulics:86,electrical:87}
+      },
+      {
+        id:5, title:'DJI Agras T30', category:'drone', categoryLabel:'โดรนการเกษตร',
+        brand:'DJI', price:185000, year:2023, hours:320,
+        province:'สุพรรณบุรี', condition:'excellent', conditionLabel:'ดีมาก', score:96, seller:'Smart Farm Pro',
+        verified:true, rating:5.0, reviews:28, date:4, image:'https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=900&q=80',
+        desc:'โดรนพ่นยาและปุ๋ย สภาพดี อุปกรณ์ครบ แบตเตอรี่ 3 ก้อน พร้อมเคสและอุปกรณ์ชาร์จ',
+        conditionDetail:{engine:97,tires:98,hydraulics:95,electrical:96}
+      },
+      {
+        id:6, title:'ผานพรวน 7 ใบ', category:'implement', categoryLabel:'อุปกรณ์ต่อพ่วง',
+        brand:'AgriTools', price:45000, year:2024, hours:0,
+        province:'นครราชสีมา', condition:'excellent', conditionLabel:'ดีมาก', score:94, seller:'โคราชเกษตรยนต์',
+        verified:true, rating:4.9, reviews:16, date:3, image:'https://images.unsplash.com/photo-1592982537447-6f3c9f0a3aa7?auto=format&fit=crop&w=900&q=80',
+        desc:'ผานพรวน 7 ใบ โครงหนา ใช้งานไม่หนัก เหมาะสำหรับเตรียมดินและงานไร่',
+        conditionDetail:{engine:95,tires:92,hydraulics:94,electrical:95}
+      },
+      {
+        id:7, title:'เครื่องสูบน้ำดีเซล 4 นิ้ว', category:'pump', categoryLabel:'เครื่องสูบน้ำ',
+        brand:'Kubota', price:68000, year:2021, hours:740,
+        province:'พิษณุโลก', condition:'good', conditionLabel:'ดี', score:88, seller:'เกษตรรุ่งเรือง',
+        verified:true, rating:4.8, reviews:31, date:2, image:'https://images.unsplash.com/photo-1581579185169-7c4d43a6e5d7?auto=format&fit=crop&w=900&q=80',
+        desc:'เครื่องสูบน้ำดีเซล 4 นิ้ว เครื่องติดง่าย แรงดี เหมาะสำหรับนาข้าวและสวน',
+        conditionDetail:{engine:90,tires:82,hydraulics:88,electrical:89}
+      },
+      {
+        id:8, title:'รถบรรทุก 6 ล้อ กระบะเหล็ก', category:'transport', categoryLabel:'รถขนส่ง',
+        brand:'Isuzu', price:620000, year:2018, hours:0,
+        province:'เชียงใหม่', condition:'fair', conditionLabel:'ใช้งานได้', score:78, seller:'North Logistic',
+        verified:true, rating:4.6, reviews:22, date:1, image:'https://images.unsplash.com/photo-1586191582056-d75d36f7ad8b?auto=format&fit=crop&w=900&q=80',
+        desc:'รถบรรทุก 6 ล้อ เหมาะสำหรับขนผลผลิตและเครื่องจักร มีร่องรอยการใช้งานตามอายุรถ',
+        conditionDetail:{engine:80,tires:70,hydraulics:82,electrical:79}
+      }
     ];
 
-    let currentSelectedProduct = null;
+    // Approximate road distance (km) from Bangkok, used only to estimate shipping cost/time between provinces
+    const PROVINCE_DIST_FROM_BKK = {
+      'กรุงเทพฯ':0, 'พิษณุโลก':377, 'นครสวรรค์':240, 'กำแพงเพชร':358,
+      'เชียงใหม่':700, 'นครราชสีมา':259, 'สุพรรณบุรี':107
+    };
 
-    // Switch Screens Function
-    function switchScreen(screenName) {
-        document.querySelectorAll('.screen-container').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+    const USER_LISTINGS_KEY = 'agrimarket_user_listings_v1';
+    const LISTING_IMAGE_MAX = 8;
+    let savedSearches = [];
+    let chatThreads = {}; // { productId: [{from:'buyer'|'seller', text}] }
+    let favorites = new Set();
 
-        if (screenName === 'list') {
-            document.getElementById('screen-list').classList.add('active');
-            document.getElementById('tab-home').classList.add('active');
-            document.getElementById('nav-title').innerText = 'ตลาดเครื่องจักรเกษตร';
-            document.getElementById('nav-action-btn').style.display = 'block';
-            renderProductList(products);
-        } else if (screenName === 'detail') {
-            document.getElementById('screen-detail').classList.add('active');
-            document.getElementById('nav-title').innerText = 'รายละเอียดอุปกรณ์';
-            document.getElementById('nav-action-btn').style.display = 'none';
-        } else if (screenName === 'create') {
-            document.getElementById('screen-create').classList.add('active');
-            document.getElementById('tab-sell').classList.add('active');
-            document.getElementById('nav-title').innerText = 'ลงประกาศขาย (3 นาที)';
-            document.getElementById('nav-action-btn').style.display = 'none';
-        }
+    function getUserListings() {
+      try { return JSON.parse(localStorage.getItem(USER_LISTINGS_KEY) || '[]'); }
+      catch { return []; }
     }
 
-    // Render Product List
-    function renderProductList(listToRender) {
-        const container = document.getElementById('product-list-content');
-        if (listToRender.length === 0) {
-            container.innerHTML = `
-                <div class="state-container">
-                    <p class="error-msg">ไม่พบสินค้าที่คุณค้นหา</p>
-                    <button class="btn-primary" onclick="resetSearch()" style="max-width:200px;">ล้างการค้นหา</button>
-                </div>
-            `;
-            return;
-        }
+    function saveUserListings(items) {
+      localStorage.setItem(USER_LISTINGS_KEY, JSON.stringify(items));
+    }
 
-        container.innerHTML = listToRender.map(item => `
-            <div class="product-card" onclick="openDetail('${item.id}')">
-                <img src="${item.imageUrl}" class="product-img" alt="${item.brand}">
-                <div class="product-info">
-                    <div class="product-title">${item.brand} ${item.model}</div>
-                    <div class="product-price">฿${item.price.toLocaleString()}</div>
-                    <div class="product-meta">📍 จังหวัด${item.province} (อ.${item.amphoe})</div>
-                    <div class="product-meta">🏷️ ประเภท: ${item.category}</div>
-                    <span class="badge-status" style="background-color: ${item.status === 'AVAILABLE' ? '#e8f5e9' : '#ffebee'}; color: ${item.status === 'AVAILABLE' ? '#2e7d32' : '#c62828'};">
-                        ${item.status === 'AVAILABLE' ? 'พร้อมขาย / ตรวจสอบแล้ว' : 'ขายแล้ว'}
-                    </span>
-                </div>
+    function categoryToKey(label) {
+      return ({
+        'รถแทรกเตอร์':'tractor','รถเกี่ยว':'harvester','โดรนการเกษตร':'drone',
+        'อุปกรณ์ต่อพ่วง':'implement','เครื่องสูบน้ำ':'pump','รถขนส่ง':'transport'
+      })[label] || 'implement';
+    }
+
+    function conditionLabel(value) {
+      return ({excellent:'ดีมาก',good:'ดี',fair:'ใช้งานได้'})[value] || 'ใช้งานได้';
+    }
+
+    function hydrateUserListings() {
+      const stored = getUserListings();
+      stored.forEach(item => {
+        if (!products.some(p => p.id === item.id)) products.push(item);
+      });
+    }
+
+    hydrateUserListings();
+    let currentFiltered = [...products];
+
+    function money(n) {
+      return new Intl.NumberFormat('th-TH').format(n);
+    }
+
+    function syncSearch(value) {
+      const hero = document.getElementById('heroSearch');
+      if (hero.value !== value) hero.value = value;
+      applyFilters();
+    }
+
+    function quickSearch(value) {
+      document.getElementById('heroSearch').value = value;
+      applyFilters();
+      document.getElementById('products').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function chooseCategory(category) {
+      document.getElementById('heroCategory').value = category;
+      applyFilters();
+      document.getElementById('products').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('heroSearch').value.trim().toLowerCase();
+      const category = document.getElementById('heroCategory').value;
+      const province = document.getElementById('heroProvince').value;
+      const price = document.getElementById('priceFilter').value;
+      const condition = document.getElementById('conditionFilter').value;
+      const brand = document.getElementById('brandFilter').value;
+      const location = document.getElementById('locationFilter').value;
+      const sort = document.getElementById('sortSelect').value;
+
+      currentFiltered = products.filter(p => {
+        const searchable = [p.title,p.brand,p.categoryLabel,p.province,p.seller,p.desc].join(' ').toLowerCase();
+        const matchQ = !q || searchable.includes(q);
+        const matchCategory = category === 'all' || p.category === category;
+        const matchProvince = province === 'all' || p.province === province;
+        const matchPrice = price === 'all' || p.price <= Number(price);
+        const matchCondition = condition === 'all' || p.condition === condition;
+        const matchBrand = brand === 'all' || p.brand === brand;
+        const matchLocation = location === 'all' || p.province === location;
+        return matchQ && matchCategory && matchProvince && matchPrice && matchCondition && matchBrand && matchLocation;
+      });
+
+      if (sort === 'priceAsc') currentFiltered.sort((a,b) => a.price-b.price);
+      if (sort === 'priceDesc') currentFiltered.sort((a,b) => b.price-a.price);
+      if (sort === 'newest') currentFiltered.sort((a,b) => b.date-a.date);
+
+      renderProducts();
+    }
+
+    function resetFilters() {
+      document.getElementById('heroSearch').value='';
+      document.getElementById('heroCategory').value='all';
+      document.getElementById('heroProvince').value='all';
+      document.getElementById('priceFilter').value='all';
+      document.getElementById('conditionFilter').value='all';
+      document.getElementById('brandFilter').value='all';
+      document.getElementById('locationFilter').value='all';
+      document.getElementById('sortSelect').value='recommended';
+      applyFilters();
+    }
+
+    function toggleAdvanced() {
+      document.getElementById('advancedFilters').classList.toggle('hidden');
+    }
+
+    function toggleFavorite(id, event) {
+      if (event) event.stopPropagation();
+      if (favorites.has(id)) {
+        favorites.delete(id);
+        showToast('นำออกจากรายการโปรดแล้ว');
+      } else {
+        favorites.add(id);
+        showToast('บันทึกลงรายการโปรดแล้ว');
+      }
+      renderProducts();
+      const badge = document.getElementById('favoriteCount');
+      badge.textContent = favorites.size;
+      badge.classList.toggle('hidden', favorites.size===0);
+      badge.classList.toggle('flex', favorites.size>0);
+    }
+
+    function card(p) {
+      const liked = favorites.has(p.id);
+      return `
+      <article class="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:-translate-y-1 hover:shadow-card transition cursor-pointer" onclick="openDetail(${p.id})">
+        <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
+          <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-x-0 top-0 p-3 flex justify-between items-start">
+            <div class="flex gap-2">
+              <span class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur text-[10px] font-semibold text-slate-700">${p.categoryLabel}</span>
+              ${p.score >= 90 ? `<span class="px-2.5 py-1 rounded-full bg-green-600/90 text-white text-[10px] font-semibold">สภาพดีมาก</span>` : ''}
             </div>
-        `).join('');
+            <button onclick="toggleFavorite(${p.id}, event)" class="w-9 h-9 rounded-xl bg-white/90 backdrop-blur grid place-items-center text-slate-500 hover:text-rose-500">
+              <i data-lucide="heart" class="w-4 h-4 ${liked ? 'heart-active':''}"></i>
+            </button>
+          </div>
+          ${p.oldPrice ? `<div class="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-rose-500 text-white text-[10px] font-bold">ลดพิเศษ</div>`:''}
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-[11px] text-slate-400">${p.brand} • ${p.year}</div>
+            <div class="flex items-center gap-1 text-[11px] text-amber-500 font-semibold"><i data-lucide="star" class="w-3 h-3 fill-current"></i>${p.rating}</div>
+          </div>
+          <h3 class="font-semibold text-slate-900 mt-1">${p.title}</h3>
+          <p class="line-clamp-2 text-xs text-slate-500 mt-1 leading-relaxed">${p.desc}</p>
+          <div class="mt-3 flex items-center justify-between">
+            <div>
+              <div class="text-xl font-bold text-slate-900">฿${money(p.price)}</div>
+              ${p.oldPrice ? `<div class="text-[10px] line-through text-slate-400">฿${money(p.oldPrice)}</div>`:''}
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-semibold text-green-700">${p.score}/100</div>
+              <div class="text-[10px] text-slate-400">คะแนนสภาพ</div>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-1 text-slate-500"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>${p.province}</div>
+            <div class="flex items-center gap-1 text-slate-500"><i data-lucide="clock-3" class="w-3.5 h-3.5"></i>${p.hours ? money(p.hours)+' ชม.' : 'พร้อมใช้งาน'}</div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-green-100 text-green-800 grid place-items-center text-[10px] font-bold">${p.seller.slice(0,1)}</div>
+              <div>
+                <div class="text-[11px] font-medium text-slate-700 flex items-center gap-1">${p.seller} ${p.verified ? '<i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-500"></i>':''}</div>
+                <div class="text-[10px] text-slate-400">${p.reviews} รีวิว</div>
+              </div>
+            </div>
+            <button onclick="openDetail(${p.id}); event.stopPropagation();" class="text-xs font-semibold text-farm-700">ดูรายละเอียด →</button>
+          </div>
+        </div>
+      </article>`;
     }
 
-    function filterProducts() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = products.filter(p => 
-            p.brand.toLowerCase().includes(query) ||
-            p.model.toLowerCase().includes(query) ||
-            p.category.toLowerCase().includes(query) ||
-            p.province.toLowerCase().includes(query)
-        );
-        renderProductList(filtered);
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      const empty = document.getElementById('emptyState');
+      document.getElementById('resultText').textContent = `พบ ${currentFiltered.length} รายการ`;
+
+      if (!currentFiltered.length) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+      } else {
+        empty.classList.add('hidden');
+        grid.innerHTML = currentFiltered.map(card).join('');
+      }
+      lucide.createIcons();
     }
 
-    function resetSearch() {
-        document.getElementById('searchInput').value = '';
-        renderProductList(products);
-    }
-
-    // Open Detail Screen
     function openDetail(id) {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-        currentSelectedProduct = product;
-
-        const container = document.getElementById('product-detail-content');
-        container.innerHTML = `
-            <div class="detail-img-container">
-                <img src="${product.imageUrl}" class="detail-img" alt="${product.brand}">
+      const p = products.find(x=>x.id===id);
+      document.getElementById('detailContent').innerHTML = `
+        <div class="grid lg:grid-cols-2">
+          <div class="bg-slate-100">
+            <img src="${p.image}" alt="${p.title}" class="w-full h-full min-h-[360px] max-h-[560px] object-cover">
+          </div>
+          <div class="p-6 lg:p-8">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-semibold">${p.categoryLabel}</span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">${p.conditionLabel}</span>
             </div>
-            
-            <div class="detail-section">
-                <h2 style="font-size: 22px; color: #1b5e20; margin-bottom: 4px;">${product.brand} ${product.model}</h2>
-                <div style="font-size: 24px; font-weight: 700; color: #e65100; margin-bottom: 8px;">฿${product.price.toLocaleString()}</div>
-                <span class="badge-status">${product.category}</span>
-            </div>
-
-            <div class="detail-section">
-                <h3>📜 ข้อมูลตรวจสอบย้อนกลับ (Legal & Traceability)</h3>
-                <div class="detail-row"><span>เลขทะเบียน/ซีเรียล:</span> <span>${product.serialNumber}</span></div>
-                <div class="detail-row"><span>เลขคัสซี (Chassis):</span> <span>${product.chassisNumber}</span></div>
-                <div class="detail-row"><span>เลขเครื่องยนต์:</span> <span>${product.engineNumber}</span></div>
-                <div class="detail-row"><span>สถานที่ตั้งตามหมุด:</span> <span>อ.${product.amphoe} จ.${product.province}</span></div>
+            <h2 class="text-3xl font-bold mt-4">${p.title}</h2>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="flex items-center gap-1 text-amber-500 text-sm font-semibold"><i data-lucide="star" class="w-4 h-4 fill-current"></i>${p.rating}</div>
+              <span class="text-xs text-slate-400">(${p.reviews} รีวิว)</span>
+              <span class="text-slate-300">•</span>
+              <span class="text-xs text-slate-500">${p.province}</span>
             </div>
 
-            <div class="detail-section">
-                <h3>👤 ข้อมูลผู้ขาย (ยืนยันตัวตนแล้ว)</h3>
-                <div class="detail-row"><span>ชื่อผู้ขาย:</span> <span>${product.seller.name}</span></div>
-                <div class="detail-row"><span>เบอร์โทรติดต่อ:</span> <span style="color: #2e7d32; font-weight: bold;">${product.seller.phone}</span></div>
-                <div class="detail-row"><span>สถานะ GAP/ตัวตน:</span> <span>${product.seller.isVerified ? '✅ ผ่านการตรวจสอบ' : '⚠️ ทั่วไป'}</span></div>
+            <div class="mt-5">
+              <div class="text-sm text-slate-500">ราคาขาย</div>
+              <div class="text-3xl font-bold text-slate-900 mt-1">฿${money(p.price)}</div>
+              ${p.oldPrice ? `<div class="text-xs text-slate-400 line-through">ราคาเดิม ฿${money(p.oldPrice)}</div>`:''}
             </div>
-        `;
-        switchScreen('detail');
+
+            <div class="grid grid-cols-2 gap-3 mt-6">
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs text-slate-400">ปี</div><div class="font-semibold mt-1">${p.year}</div></div>
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs text-slate-400">ชั่วโมงใช้งาน</div><div class="font-semibold mt-1">${p.hours ? money(p.hours)+' ชม.':'-'}</div></div>
+              <div class="rounded-2xl bg-green-50 p-4"><div class="text-xs text-green-600">คะแนนสภาพ</div><div class="font-bold text-green-700 mt-1">${p.score}/100</div></div>
+              <div class="rounded-2xl bg-blue-50 p-4"><div class="text-xs text-blue-600">ผู้ขาย</div><div class="font-semibold text-blue-700 mt-1 flex items-center gap-1">${p.seller} <i data-lucide="badge-check" class="w-4 h-4"></i></div></div>
+            </div>
+
+            <!-- Safe payment / escrow banner -->
+            <div class="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl bg-white text-farm-700 grid place-items-center shrink-0"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+              <div>
+                <div class="text-sm font-semibold text-farm-800">ชำระเงินผ่านระบบพักเงินกลาง (Escrow)</div>
+                <p class="text-xs text-farm-700/80 mt-0.5 leading-relaxed">เงินจะถูกโอนให้ผู้ขายก็ต่อเมื่อคุณยืนยันว่าได้รับสินค้าตรงตามที่ตกลงแล้วเท่านั้น ลดความเสี่ยงจากการโอนเงินล่วงหน้า</p>
+              </div>
+            </div>
+
+            <!-- Condition breakdown -->
+            ${p.conditionDetail ? `
+            <div class="mt-6">
+              <div class="font-semibold flex items-center gap-2"><i data-lucide="gauge" class="w-4 h-4 text-farm-700"></i> รายละเอียดคะแนนสภาพ</div>
+              <div class="space-y-3 mt-3">
+                ${[['engine','เครื่องยนต์ / มอเตอร์'],['tires','ยาง / ล้อ / ใบพัด'],['hydraulics','ไฮดรอลิก / กลไก'],['electrical','ระบบไฟฟ้า / อิเล็กทรอนิกส์']].map(([key,label]) => `
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="text-slate-500">${label}</span>
+                    <span class="font-semibold text-slate-700">${p.conditionDetail[key]}/100</span>
+                  </div>
+                  <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-farm-500" style="width:${p.conditionDetail[key]}%"></div>
+                  </div>
+                </div>`).join('')}
+              </div>
+              <p class="text-[11px] text-slate-400 mt-2">คะแนนประเมินโดยผู้ขายและอ้างอิงจากรูป/วิดีโอที่แนบ แนะนำให้ตรวจสอบซ้ำหรือจ้างช่างตรวจสภาพก่อนโอนเงิน</p>
+            </div>` : ''}
+
+            <div class="mt-6">
+              <div class="font-semibold">รายละเอียด</div>
+              <p class="text-sm text-slate-600 leading-relaxed mt-2">${p.desc}</p>
+            </div>
+
+            <!-- Shipping estimator -->
+            <div class="mt-6 rounded-2xl border border-slate-200 p-4">
+              <div class="font-semibold flex items-center gap-2 text-sm"><i data-lucide="truck" class="w-4 h-4 text-farm-700"></i> ประเมินค่าขนส่ง</div>
+              <div class="flex flex-col sm:flex-row gap-2 mt-3">
+                <select id="shipFromProvince" class="h-10 px-3 rounded-xl border border-slate-200 text-sm flex-1">
+                  <option value="กรุงเทพฯ">จากกรุงเทพฯ</option>
+                  <option value="พิษณุโลก">จากพิษณุโลก</option>
+                  <option value="นครสวรรค์">จากนครสวรรค์</option>
+                  <option value="กำแพงเพชร">จากกำแพงเพชร</option>
+                  <option value="เชียงใหม่">จากเชียงใหม่</option>
+                  <option value="นครราชสีมา">จากนครราชสีมา</option>
+                  <option value="สุพรรณบุรี">จากสุพรรณบุรี</option>
+                </select>
+                <button onclick="calcShipping(${p.id})" class="h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold">คำนวณ</button>
+              </div>
+              <div id="shipResult" class="text-xs text-slate-500 mt-3"></div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-2 gap-3">
+              <button onclick="openChat(${p.id})" class="h-12 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold flex items-center justify-center gap-2">
+                <i data-lucide="message-circle" class="w-5 h-5"></i> แชตกับผู้ขาย
+              </button>
+              <button onclick="showToast('บันทึกลงรายการโปรดแล้ว'); toggleFavorite(${p.id})" class="h-12 rounded-xl border border-slate-200 hover:bg-slate-50 font-semibold flex items-center justify-center gap-2">
+                <i data-lucide="heart" class="w-5 h-5"></i> บันทึก
+              </button>
+            </div>
+            <button onclick="showToast('ส่งคำขอนัดดูสินค้าแล้ว (Demo)')" class="mt-3 w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="calendar-days" class="w-4 h-4"></i> นัดดูสินค้า
+            </button>
+            <button onclick="openReport(${p.id})" class="mt-3 w-full h-10 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="flag" class="w-3.5 h-3.5"></i> รายงานประกาศนี้
+            </button>
+          </div>
+        </div>
+      `;
+      openModal('detailModal');
+      lucide.createIcons();
     }
 
-    // Submit Product (Create)
-    function submitProduct(event) {
-        event.preventDefault();
-        const brand = document.getElementById('f_brand').value;
-        const model = document.getElementById('f_model').value;
-        const price = parseFloat(document.getElementById('f_price').value);
-        const category = document.getElementById('f_category').value;
-        const serialNumber = document.getElementById('f_serial').value;
-        const imageInput = document.getElementById('f_image');
+    function calcShipping(id) {
+      const p = products.find(x=>x.id===id);
+      const from = document.getElementById('shipFromProvince').value;
+      const distFrom = PROVINCE_DIST_FROM_BKK[from] ?? 0;
+      const distTo = PROVINCE_DIST_FROM_BKK[p.province] ?? 0;
+      const km = from === p.province ? 25 : Math.max(30, Math.abs(distFrom - distTo) + 40);
+      const cost = 800 + km * 15;
+      const days = Math.max(1, Math.ceil(km / 300));
+      document.getElementById('shipResult').innerHTML = `
+        ระยะทางโดยประมาณ <span class="font-semibold text-slate-700">${money(km)} กม.</span> จาก ${from} ถึง ${p.province}
+        &nbsp;•&nbsp; ค่าขนส่งโดยประมาณ <span class="font-semibold text-slate-700">฿${money(cost)}</span>
+        &nbsp;•&nbsp; ใช้เวลาประมาณ <span class="font-semibold text-slate-700">${days} วัน</span>
+        <div class="text-[11px] text-slate-400 mt-1">*ราคาประมาณการสำหรับรถพ่วง/เทรลเลอร์ ขึ้นอยู่กับน้ำหนักและขนาดสินค้าจริง</div>
+      `;
+    }
 
-        // จัดการรูปภาพที่เลือกจากคลัง (แปลงเป็น Object URL ชั่วคราวสำหรับการแสดงผลใน MVP)
-        let imageUrl = "https://images.unsplash.com/photo-1592417817098-8f3d69204b5f";
-        if (imageInput.files && imageInput.files[0]) {
-            imageUrl = URL.createObjectURL(imageInput.files[0]);
-        }
+    function openCompare() {
+      openModal('compareModal');
+    }
 
-        const newProduct = {
-            id: 'prod-' + (products.length + 1),
-            brand,
-            model,
-            price,
-            category,
-            serialNumber,
-            chassisNumber: 'CHS-' + Math.floor(100000 + Math.random() * 900000),
-            engineNumber: 'ENG-' + Math.floor(10000 + Math.random() * 90000),
-            province: 'พิษณุโลก',
-            amphoe: 'เมืองพิษณุโลก',
-            status: 'AVAILABLE',
-            imageUrl,
-            seller: { name: 'คุณเกษตรกร มือใหม่', phone: '085-555-4433', isVerified: true }
+    // ---- Chat ----
+    function openChat(id) {
+      const p = products.find(x=>x.id===id);
+      if (!chatThreads[id]) {
+        chatThreads[id] = [
+          {from:'seller', text:`สวัสดีครับ สนใจ ${p.title} สอบถามอะไรเพิ่มเติมได้เลยครับ`}
+        ];
+      }
+      document.getElementById('chatSellerAvatar').textContent = p.seller.slice(0,1);
+      document.getElementById('chatSellerName').textContent = p.seller;
+      document.getElementById('chatProductTitle').textContent = p.title;
+      document.getElementById('chatMessages').dataset.productId = id;
+      renderChat(id);
+      closeModal('detailModal');
+      openModal('chatModal');
+    }
+
+    function renderChat(id) {
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = chatThreads[id].map(m => `
+        <div class="flex ${m.from==='buyer' ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${m.from==='buyer' ? 'bg-farm-600 text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-sm'}">${m.text}</div>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChatMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const id = Number(document.getElementById('chatMessages').dataset.productId);
+      chatThreads[id].push({from:'buyer', text});
+      input.value = '';
+      renderChat(id);
+      setTimeout(() => {
+        chatThreads[id].push({from:'seller', text:'ขอบคุณสำหรับข้อความครับ เดี๋ยวรีบตอบกลับให้เร็วที่สุดนะครับ'});
+        renderChat(id);
+      }, 900);
+    }
+
+    // ---- Report listing ----
+    function openReport(id) {
+      const p = products.find(x=>x.id===id);
+      document.getElementById('reportProductTitle').textContent = `กำลังรายงานประกาศ: ${p.title}`;
+      document.getElementById('reportModal').dataset.productId = id;
+      closeModal('detailModal');
+      openModal('reportModal');
+    }
+
+    function submitReport(e) {
+      e.preventDefault();
+      closeModal('reportModal');
+      showToast('ส่งรายงานเรียบร้อย ทีมงานจะตรวจสอบภายใน 24 ชม.');
+      e.target.reset();
+    }
+
+    // ---- Seller dashboard ----
+    function openSellerDashboard() {
+      const user = getCurrentUser();
+      if (!user) {
+        openModal('loginModal');
+        setAuthError('loginError', 'กรุณาเข้าสู่ระบบเพื่อดูแดชบอร์ดผู้ขาย');
+        return;
+      }
+      const mine = getUserListings().filter(p => p.ownerId === user.id).sort((a,b) => Number(b.updatedAt ? new Date(b.updatedAt) : 0) - Number(a.updatedAt ? new Date(a.updatedAt) : 0));
+      document.getElementById('dashListingCount').textContent = mine.length;
+      document.getElementById('dashListings').innerHTML = mine.length ? mine.map(p => `
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-2xl border border-slate-200">
+          <img src="${p.image}" class="w-20 h-16 rounded-xl object-cover bg-slate-100">
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold truncate">${p.title}</div>
+            <div class="text-xs text-slate-400 mt-1">฿${money(p.price)} • ${p.province} • ${p.categoryLabel}</div>
+            <span class="inline-flex mt-2 px-2.5 py-1 rounded-full ${p.status === 'draft' ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'} text-[10px] font-semibold">${p.status === 'draft' ? 'แบบร่าง' : 'กำลังลงประกาศ'}</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editUserListing(${p.id})" class="px-3 h-9 rounded-lg border border-slate-200 text-xs font-medium hover:bg-slate-50">แก้ไข</button>
+            <button onclick="deleteUserListing(${p.id})" class="px-3 h-9 rounded-lg bg-rose-50 text-rose-600 text-xs font-medium hover:bg-rose-100">ลบ</button>
+          </div>
+        </div>
+      `).join('') : `<div class="py-10 text-center text-sm text-slate-500 border border-dashed border-slate-200 rounded-2xl">ยังไม่มีประกาศของคุณ<br><button onclick="closeModal('sellerModal'); requireAuthForListing()" class="mt-3 px-4 h-10 rounded-xl bg-farm-600 text-white font-semibold">เริ่มลงประกาศ</button></div>`;
+      openModal('sellerModal');
+    }
+
+    function editUserListing(id) {
+      const user = getCurrentUser();
+      const listing = getUserListings().find(p => p.id === id && p.ownerId === user?.id);
+      if (!listing) return showToast('ไม่พบประกาศนี้');
+      closeModal('sellerModal');
+      openListingForm(listing);
+    }
+
+    function deleteUserListing(id) {
+      const user = getCurrentUser();
+      const listing = getUserListings().find(p => p.id === id && p.ownerId === user?.id);
+      if (!listing) return;
+      if (!confirm(`ต้องการลบประกาศ "${listing.title}" ใช่หรือไม่?`)) return;
+      saveUserListings(getUserListings().filter(p => p.id !== id));
+      const idx = products.findIndex(p => p.id === id);
+      if (idx >= 0) products.splice(idx, 1);
+      applyFilters();
+      openSellerDashboard();
+      showToast('ลบประกาศเรียบร้อยแล้ว');
+    }
+
+    // ---- Saved search alerts ----
+    function saveCurrentSearch() {
+      const q = document.getElementById('heroSearch').value.trim();
+      const category = document.getElementById('heroCategory').value;
+      savedSearches.push({q, category, savedAt: Date.now()});
+      const badge = document.getElementById('savedSearchCount');
+      badge.textContent = savedSearches.length;
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+      showToast('บันทึกการค้นหานี้แล้ว จะแจ้งเตือนเมื่อมีสินค้าใหม่ตรงเงื่อนไข');
+    }
+
+    // ---- Authentication (browser-local prototype) ----
+    const AUTH_USERS_KEY = 'agrimarket_users_v1';
+    const AUTH_SESSION_KEY = 'agrimarket_session_v1';
+    const AUTH_SESSION_TEMP_KEY = 'agrimarket_session_temp_v1';
+
+    function getUsers() {
+      try { return JSON.parse(localStorage.getItem(AUTH_USERS_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
+    }
+
+    function normalizeEmail(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function normalizePhone(value) {
+      return String(value || '').replace(/\D/g, '');
+    }
+
+    async function hashPassword(password) {
+      const bytes = new TextEncoder().encode(password);
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function setAuthError(id, message='') {
+      const box = document.getElementById(id);
+      if (!box) return;
+      box.textContent = message;
+      box.classList.toggle('hidden', !message);
+    }
+
+    function switchAuthModal(fromId, toId) {
+      closeModal(fromId);
+      openModal(toId);
+      setAuthError('loginError', '');
+      setAuthError('registerError', '');
+    }
+
+    function getCurrentUser() {
+      const raw = localStorage.getItem(AUTH_SESSION_KEY) || sessionStorage.getItem(AUTH_SESSION_TEMP_KEY);
+      if (!raw) return null;
+      try {
+        const session = JSON.parse(raw);
+        return getUsers().find(u => u.id === session.userId) || null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveSession(userId, remember) {
+      const payload = JSON.stringify({ userId, loggedInAt: Date.now() });
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      sessionStorage.removeItem(AUTH_SESSION_TEMP_KEY);
+      if (remember) localStorage.setItem(AUTH_SESSION_KEY, payload);
+      else sessionStorage.setItem(AUTH_SESSION_TEMP_KEY, payload);
+    }
+
+    function roleLabel(role) {
+      return ({buyer:'ผู้ซื้อ / เกษตรกร', seller:'ผู้ขาย / เจ้าของรถ', shop:'ร้านค้า / ผู้ประกอบการ'})[role] || 'สมาชิก';
+    }
+
+    function updateAuthUI() {
+      const user = getCurrentUser();
+      const loginBtn = document.getElementById('loginButton');
+      const userMenu = document.getElementById('userMenu');
+      if (!loginBtn || !userMenu) return;
+
+      if (user) {
+        loginBtn.classList.add('hidden');
+        userMenu.classList.remove('hidden');
+        userMenu.classList.add('flex');
+        document.getElementById('userDisplayName').textContent = user.name;
+        document.getElementById('userRoleLabel').textContent = roleLabel(user.role);
+        document.getElementById('userInitial').textContent = (user.name || 'U').trim().slice(0,1).toUpperCase();
+      } else {
+        loginBtn.classList.remove('hidden');
+        userMenu.classList.add('hidden');
+        userMenu.classList.remove('flex');
+      }
+      lucide.createIcons();
+    }
+
+    async function registerUser(event) {
+      event.preventDefault();
+      setAuthError('registerError', '');
+
+      const name = document.getElementById('registerName').value.trim();
+      const role = document.getElementById('registerRole').value;
+      const email = normalizeEmail(document.getElementById('registerEmail').value);
+      const phone = normalizePhone(document.getElementById('registerPhone').value);
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+      if (name.length < 2) return setAuthError('registerError', 'กรุณากรอกชื่อ-นามสกุลให้ถูกต้อง');
+      if (!/^\S+@\S+\.\S+$/.test(email)) return setAuthError('registerError', 'รูปแบบอีเมลไม่ถูกต้อง');
+      if (!/^0\d{9}$/.test(phone)) return setAuthError('registerError', 'กรุณากรอกเบอร์โทรศัพท์ไทย 10 หลัก เช่น 0812345678');
+      if (password.length < 6) return setAuthError('registerError', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+      if (password !== confirmPassword) return setAuthError('registerError', 'รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
+
+      const users = getUsers();
+      if (users.some(u => u.email === email)) return setAuthError('registerError', 'อีเมลนี้ถูกใช้สมัครสมาชิกแล้ว');
+      if (users.some(u => u.phone === phone)) return setAuthError('registerError', 'เบอร์โทรนี้ถูกใช้สมัครสมาชิกแล้ว');
+
+      const user = {
+        id: (crypto.randomUUID ? crypto.randomUUID() : 'u_' + Date.now()),
+        name, role, email, phone,
+        passwordHash: await hashPassword(password),
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      saveUsers(users);
+      saveSession(user.id, true);
+      event.target.reset();
+      closeModal('registerModal');
+      updateAuthUI();
+      showToast(`สมัครสมาชิกสำเร็จ ยินดีต้อนรับ ${user.name}`);
+    }
+
+    async function loginUser(event) {
+      event.preventDefault();
+      setAuthError('loginError', '');
+
+      const identifierRaw = document.getElementById('loginIdentifier').value.trim();
+      const email = normalizeEmail(identifierRaw);
+      const phone = normalizePhone(identifierRaw);
+      const passwordHash = await hashPassword(document.getElementById('loginPassword').value);
+
+      const user = getUsers().find(u => (u.email === email || u.phone === phone) && u.passwordHash === passwordHash);
+      if (!user) {
+        setAuthError('loginError', 'อีเมล/เบอร์โทร หรือรหัสผ่านไม่ถูกต้อง');
+        return;
+      }
+
+      saveSession(user.id, document.getElementById('rememberMe').checked);
+      event.target.reset();
+      closeModal('loginModal');
+      updateAuthUI();
+      showToast(`เข้าสู่ระบบสำเร็จ สวัสดี ${user.name}`);
+    }
+
+    function logout() {
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      sessionStorage.removeItem(AUTH_SESSION_TEMP_KEY);
+      updateAuthUI();
+      showToast('ออกจากระบบเรียบร้อย');
+    }
+
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      button.textContent = showing ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน';
+    }
+
+    function requireAuthForListing() {
+      const user = getCurrentUser();
+      if (!user) {
+        openModal('loginModal');
+        setAuthError('loginError', 'กรุณาเข้าสู่ระบบหรือสร้างบัญชีก่อนลงประกาศขาย');
+        return;
+      }
+      openListingForm();
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+      if (![...document.querySelectorAll('[id$="Modal"]')].some(x => !x.classList.contains('hidden'))) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function openListingForm(listing = null) {
+      const form = document.getElementById('listingForm');
+      const error = document.getElementById('listingFormError');
+      error.classList.add('hidden');
+      error.textContent = '';
+      form.reset();
+      document.getElementById('listingId').value = listing?.id || '';
+      if (listing) {
+        form.elements.title.value = listing.title || '';
+        form.elements.category.value = listing.category || categoryToKey(listing.categoryLabel);
+        form.elements.brand.value = listing.brand || '';
+        form.elements.price.value = listing.price || '';
+        form.elements.province.value = listing.province || 'พิษณุโลก';
+        form.elements.condition.value = listing.condition || 'good';
+        form.elements.year.value = listing.year || '';
+        form.elements.hours.value = listing.hours || '';
+        form.elements.desc.value = listing.desc || '';
+      }
+      document.getElementById('listingImagePreview').innerHTML = (listing?.images || (listing?.image ? [listing.image] : [])).map(src =>
+        `<div class="relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white"><img src="${src}" class="w-full h-full object-cover"></div>`
+      ).join('');
+      openModal('listingModal');
+    }
+
+    function setListingError(message) {
+      const box = document.getElementById('listingFormError');
+      box.textContent = message;
+      box.classList.remove('hidden');
+    }
+
+    function compressImage(file, maxSize=1200, quality=.78) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(img.width * scale));
+            canvas.height = Math.max(1, Math.round(img.height * scale));
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function previewListingImages() {
+      const input = document.getElementById('listingImages');
+      const preview = document.getElementById('listingImagePreview');
+      const files = Array.from(input.files || []).slice(0, LISTING_IMAGE_MAX);
+      if (input.files.length > LISTING_IMAGE_MAX) setListingError(`เลือกได้สูงสุด ${LISTING_IMAGE_MAX} รูป ระบบจะใช้เฉพาะ ${LISTING_IMAGE_MAX} รูปแรก`);
+      else document.getElementById('listingFormError').classList.add('hidden');
+      preview.innerHTML = '';
+      files.forEach(file => {
+        const url = URL.createObjectURL(file);
+        preview.insertAdjacentHTML('beforeend', `<div class="relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white"><img src="${url}" class="w-full h-full object-cover"></div>`);
+      });
+    }
+
+    async function submitListing(e, forcedStatus=null) {
+      if (e) e.preventDefault();
+      const form = document.getElementById('listingForm');
+      const user = getCurrentUser();
+      if (!user) {
+        closeModal('listingModal');
+        requireAuthForListing();
+        return;
+      }
+
+      const data = new FormData(form);
+      const title = String(data.get('title') || '').trim();
+      const desc = String(data.get('desc') || '').trim();
+      const price = Number(data.get('price'));
+      const files = Array.from(document.getElementById('listingImages').files || []).slice(0, LISTING_IMAGE_MAX);
+      const existing = form.elements.listingId.value;
+      const storedItems = getUserListings();
+      const old = storedItems.find(x => String(x.id) === String(existing));
+
+      if (!title || title.length < 3) return setListingError('กรุณากรอกชื่อสินค้าอย่างน้อย 3 ตัวอักษร');
+      if (!Number.isFinite(price) || price <= 0) return setListingError('กรุณาระบุราคาที่มากกว่า 0 บาท');
+      if (!desc || desc.length < 10) return setListingError('กรุณาใส่รายละเอียดสินค้าอย่างน้อย 10 ตัวอักษร');
+      if (!old && files.length === 0) return setListingError('กรุณาเลือกรูปสินค้าอย่างน้อย 1 รูปก่อนลงประกาศ');
+      if (old && files.length === 0 && !(old.images || []).length) return setListingError('กรุณาเลือกรูปสินค้าอย่างน้อย 1 รูป');
+
+      const submitButton = form.querySelector('button[type="submit"]');
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('opacity-60','cursor-not-allowed');
+      }
+
+      try {
+        const images = files.length ? await Promise.all(files.map(f => compressImage(f))) : (old?.images || []);
+        const category = String(data.get('category'));
+        const categoryLabelMap = {
+          tractor:'รถแทรกเตอร์', harvester:'รถเกี่ยว', drone:'โดรนการเกษตร',
+          implement:'อุปกรณ์ต่อพ่วง', pump:'เครื่องสูบน้ำ', transport:'รถขนส่ง'
+        };
+        const id = existing ? Number(existing) : Date.now();
+        const item = {
+          id, title, category, categoryLabel: categoryLabelMap[category] || 'อุปกรณ์ต่อพ่วง',
+          brand: String(data.get('brand') || '').trim() || 'ไม่ระบุ',
+          price, year: Number(data.get('year')) || new Date().getFullYear(),
+          hours: Number(data.get('hours')) || 0, province: String(data.get('province')),
+          condition: String(data.get('condition')), conditionLabel: conditionLabel(String(data.get('condition'))),
+          score: String(data.get('condition')) === 'excellent' ? 92 : String(data.get('condition')) === 'good' ? 82 : 70,
+          seller: user.name, sellerId: user.id, ownerId: user.id, verified: true,
+          rating: 5, reviews: 0, date: Date.now(), image: images[0], images, desc,
+          status: forcedStatus || (e?.submitter?.dataset?.status) || 'published',
+          createdAt: old?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString(),
+          conditionDetail: {engine:80,tires:80,hydraulics:80,electrical:80}
         };
 
-        products.unshift(newProduct);
-        alert('ลงประกาศขายสำเร็จภายใน 3 นาทีเรียบร้อยแล้ว!');
-        document.getElementById('createForm').reset();
-        switchScreen('list');
-    }
+        const idx = storedItems.findIndex(x => String(x.id) === String(id));
+        if (idx >= 0) storedItems[idx] = item; else storedItems.push(item);
+        saveUserListings(storedItems);
 
-    function handleBuyAction() {
-        if (!currentSelectedProduct) return;
-        if (currentSelectedProduct.status === 'SOLD') {
-            alert('สินค้านี้ถูกขายไปแล้วครับ');
-            return;
+        const productIdx = products.findIndex(x => x.id === id);
+        if (productIdx >= 0) products[productIdx] = item; else products.unshift(item);
+        currentFiltered = [...products];
+
+        closeModal('listingModal');
+        form.reset();
+        document.getElementById('listingImagePreview').innerHTML = '';
+        applyFilters();
+        showToast(item.status === 'draft' ? `บันทึกแบบร่าง "${title}" แล้ว` : `ลงประกาศ "${title}" สำเร็จแล้ว`);
+      } catch (err) {
+        console.error(err);
+        setListingError('ไม่สามารถประมวลผลรูปภาพได้ กรุณาลองเลือกรูปใหม่อีกครั้ง');
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.classList.remove('opacity-60','cursor-not-allowed');
         }
-        alert(`ติดต่อผู้ขาย (${currentSelectedProduct.seller.name}) สำเร็จ!\nระบบได้ส่งเบอร์โทร ${currentSelectedProduct.seller.phone} ไปยัง SMS ของท่านแล้วเพื่อทำสัญญาซื้อขายตามกฎหมาย`);
+      }
     }
 
-    // Initial Render
-    renderProductList(products);
-</script>
+    function submitListingDraft(event) {
+      return submitListing(event, 'draft');
+    }
 
+    document.addEventListener('change', e => {
+      if (e.target && e.target.id === 'listingImages') previewListingImages();
+    });
+
+    let toastTimer;
+    function showToast(text) {
+      const box = document.getElementById('toast');
+      document.getElementById('toastText').textContent = text;
+      box.classList.remove('translate-y-20','opacity-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('translate-y-20','opacity-0'), 2400);
+    }
+
+    // Deal timer
+    let remaining = 5*3600 + 42*60 + 18;
+    setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+      const h = String(Math.floor(remaining/3600)).padStart(2,'0');
+      const m = String(Math.floor((remaining%3600)/60)).padStart(2,'0');
+      const s = String(remaining%60).padStart(2,'0');
+      document.getElementById('hh').textContent = h;
+      document.getElementById('mm').textContent = m;
+      document.getElementById('ss').textContent = s;
+    },1000);
+
+    // Keyboard escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('[id$="Modal"]').forEach(m => {
+          if (!m.classList.contains('hidden')) closeModal(m.id);
+        });
+      }
+    });
+
+    // Init
+    lucide.createIcons();
+    renderProducts();
+    updateAuthUI();
+  </script>
 </body>
 </html>
