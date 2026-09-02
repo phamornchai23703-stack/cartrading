@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DurianDirect - ตลาดเครื่องจักรและอุปกรณ์การเกษตรมือสอง</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f0;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .phone-mockup {
+            width: 100%;
+            max-width: 420px;
+            height: 850px;
+            background-color: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 10px solid #2d3748;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background-color: #1b5e20;
+            color: #ffffff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .status-bar span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #2e7d32;
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .btn-nav-sell {
+            background-color: #ff8f00;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 48px;
+            min-width: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+
+        .btn-nav-sell:hover {
+            background-color: #e68100;
+        }
+
+        /* Screen Container */
+        .screen-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background-color: #f9fafb;
+            display: none;
+        }
+
+        .screen-container.active {
+            display: block;
+        }
+
+        /* Search Section */
+        .search-box {
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px;
+            font-size: 18px;
+            border: 2px solid #c8e6c9;
+            border-radius: 12px;
+            background-color: #ffffff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: #2e7d32;
+        }
+
+        /* Product Cards */
+        .product-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #e0e0e0;
+        }
+
+        .product-info {
+            padding: 16px;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1b5e20;
+            margin-bottom: 4px;
+        }
+
+        .product-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e65100;
+            margin-bottom: 8px;
+        }
+
+        .product-meta {
+            font-size: 16px;
+            color: #555555;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-status {
+            display: inline-block;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* Detail Screen Specifics */
+        .detail-img-container {
+            position: relative;
+            width: 100%;
+            height: 240px;
+        }
+
+        .detail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-section {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            border: 1px solid #e0e0e0;
+        }
+
+        .detail-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1b5e20;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e8f5e9;
+            padding-bottom: 6px;
+        }
+
+        .detail-row {
+            font-size: 17px;
+            color: #333333;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-row span:first-child {
+            font-weight: 600;
+            color: #555555;
+        }
+
+        /* Footer Action Button */
+        .action-footer {
+            padding: 16px;
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background-color: #2e7d32;
+            color: #ffffff;
+            border: none;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+            min-height: 48px;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b5e20;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333333;
+            border: none;
+            padding: 0 20px;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 48px;
+        }
+
+        /* Form Screen Specifics */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 17px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px;
+            font-size: 17px;
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            background-color: #ffffff;
+            outline: none;
+        }
+
+        .form-group input[type="file"] {
+            padding: 10px;
+            font-size: 16px;
+            height: 56px;
+            background-color: #fafafa;
+            cursor: pointer;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2e7d32;
+        }
+
+        .form-hint {
+            font-size: 14px;
+            color: #e65100;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Navigation Tab Bar at bottom */
+        .bottom-tabs {
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            height: 64px;
+        }
+
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #757575;
+            min-height: 48px;
+        }
+
+        .tab-item.active {
+            color: #2e7d32;
+            background-color: #f1f8e9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-mockup">
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <span>DurianDirect MVP</span>
+        <span id="network-status">🟢 ออนไลน์</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <div class="navbar">
+        <h1 id="nav-title">ตลาดเครื่องจักรเกษตร</h1>
+        <button class="btn-nav-sell" id="nav-action-btn" onclick="switchScreen('create')">+ ลงขาย</button>
+    </div>
+
+    <!-- SCREEN 1: PRODUCT LIST -->
+    <div id="screen-list" class="screen-container active">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 ค้นหายี่ห้อ, รุ่น, ประเภท..." oninput="filterProducts()">
+        </div>
+        
+        <div id="product-list-content">
+            <!-- Rendered by JavaScript -->
+        </div>
+    </div>
+
+    <!-- SCREEN 2: PRODUCT DETAIL -->
+    <div id="screen-detail" class="screen-container">
+        <div id="product-detail-content">
+            <!-- Rendered by JavaScript -->
+        </div>
+        <div class="action-footer">
+            <button class="btn-secondary" onclick="switchScreen('list')">ย้อนกลับ</button>
+            <button class="btn-primary" onclick="handleBuyAction()">ติดต่อซื้อ / ทำสัญญา</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: CREATE PRODUCT (MAX 6 FIELDS) -->
+    <div id="screen-create" class="screen-container">
+        <div style="margin-bottom: 16px;">
+            <h2 style="color: #1b5e20; font-size: 22px; font-weight: 700;">ลงประกาศขายอุปกรณ์</h2>
+            <p style="color: #666; font-size: 15px;">กรอกข้อมูลกระชับภายใน 3 นาที (ไม่เกิน 6 ช่อง)</p>
+        </div>
+
+        <form id="createForm" onsubmit="submitProduct(event)">
+            <div class="form-group">
+                <label>1. ยี่ห้ออุปกรณ์ *</label>
+                <input type="text" id="f_brand" placeholder="เช่น Kubota, Yanmar" required>
+            </div>
+
+            <div class="form-group">
+                <label>2. รุ่น *</label>
+                <input type="text" id="f_model" placeholder="เช่น L4018, EF494T" required>
+            </div>
+
+            <div class="form-group">
+                <label>3. ราคา (บาท) *</label>
+                <input type="number" id="f_price" placeholder="เช่น 280000" required>
+            </div>
+
+            <div class="form-group">
+                <label>4. ประเภทอุปกรณ์ *</label>
+                <select id="f_category" required>
+                    <option value="">-- เลือกประเภท --</option>
+                    <option value="รถแทรกเตอร์">รถแทรกเตอร์</option>
+                    <option value="รถเกี่ยวข้าว">รถเกี่ยวข้าว</option>
+                    <option value="เครื่องสูบน้ำ">เครื่องสูบน้ำ</option>
+                    <option value="เครื่องพ่นยา">เครื่องพ่นยา</option>
+                    <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>5. เลขทะเบียน / เลขซีเรียลเครื่องจักร *</label>
+                <input type="text" id="f_serial" placeholder="ระบุเพื่อตรวจสอบย้อนกลับและทำสัญญา" required>
+                <div class="form-hint">⚠️ จำเป็นตามกฎหมายสัญญาซื้อขายและกรมการขนส่ง</div>
+            </div>
+
+            <div class="form-group">
+                <label>6. รูปถ่ายอุปกรณ์จากคลัง (เลือกรูปภาพ) *</label>
+                <input type="file" id="f_image" accept="image/*" required>
+                <div class="form-hint">📁 รองรับการเลือกรูปภาพจากเครื่องหรือถ่ายรูปใหม่</div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="button" class="btn-secondary" style="flex:1;" onclick="switchScreen('list')">ยกเลิก</button>
+                <button type="submit" class="btn-primary" style="flex:2;">ยืนยันลงขายทันที</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bottom Tab Navigation -->
+    <div class="bottom-tabs">
+        <button class="tab-item active" id="tab-home" onclick="switchScreen('list')">
+            <span>🏠 ตลาดสินค้า</span>
+        </button>
+        <button class="tab-item" id="tab-sell" onclick="switchScreen('create')">
+            <span>➕ ลงขายด่วน</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Seed Data ตัวอย่าง 10 รายการตามบริบทตลาดไทย
+    let products = [
+        {
+            id: "prod-001",
+            brand: "Kubota",
+            model: "L4018",
+            price: 280000,
+            category: "รถแทรกเตอร์",
+            serialNumber: "KB-L4018-9921",
+            chassisNumber: "CHS-883921",
+            engineNumber: "ENG-44210",
+            province: "พิษณุโลก",
+            amphoe: "เมืองพิษณุโลก",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d69204b5f",
+            seller: { name: "คุณลุงสมชาย เกษตรก้าวหน้า", phone: "081-234-5678", isVerified: true }
+        },
+        {
+            id: "prod-002",
+            brand: "Yanmar",
+            model: "EF494T",
+            price: 350000,
+            category: "รถแทรกเตอร์",
+            serialNumber: "YM-EF494-1102",
+            chassisNumber: "CHS-554120",
+            engineNumber: "ENG-99182",
+            province: "นครสวรรค์",
+            amphoe: "ตาคลี",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854",
+            seller: { name: "เจ๊นาง ไร่ข้าวโพดทอง", phone: "089-876-5432", isVerified: true }
+        },
+        {
+            id: "prod-003",
+            brand: "Kubota",
+            model: "DC-70G",
+            price: 450000,
+            category: "รถเกี่ยวข้าว",
+            serialNumber: "KB-DC70-3392",
+            chassisNumber: "CHS-110293",
+            engineNumber: "ENG-77382",
+            province: "สุพรรณบุรี",
+            amphoe: "สองพี่น้อง",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449",
+            seller: { name: "พี่ประเสริฐ เครื่องจักรกล", phone: "085-111-2233", isVerified: false }
+        },
+        {
+            id: "prod-004",
+            brand: "Honda",
+            model: "WB30XT",
+            price: 4500,
+            category: "เครื่องสูบน้ำ",
+            serialNumber: "HD-WB30-5512",
+            chassisNumber: "N/A",
+            engineNumber: "ENG-11234",
+            province: "พิจิตร",
+            amphoe: "ตะพานหิน",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+            seller: { name: "ผู้ใหญ่สมนึก ชุมแสง", phone: "082-333-4455", isVerified: true }
+        },
+        {
+            id: "prod-005",
+            brand: "MITEC",
+            model: "MT-100",
+            price: 18000,
+            category: "เครื่องพ่นยา",
+            serialNumber: "MT-100-881",
+            chassisNumber: "N/A",
+            engineNumber: "ENG-55612",
+            province: "เชียงใหม่",
+            amphoe: "สันทราย",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d",
+            seller: { name: "พ่อเลี้ยงณรงค์ สวนส้ม", phone: "088-999-0011", isVerified: true }
+        },
+        {
+            id: "prod-006",
+            brand: "Kubota",
+            model: "L5018",
+            price: 390000,
+            category: "รถแทรกเตอร์",
+            serialNumber: "KB-L5018-7711",
+            chassisNumber: "CHS-667182",
+            engineNumber: "ENG-88219",
+            province: "พิษณุโลก",
+            amphoe: "บางระกำ",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d69204b5f",
+            seller: { name: "คุณบุญส่ง นาดี", phone: "084-555-6677", isVerified: true }
+        },
+        {
+            id: "prod-007",
+            brand: "Yanmar",
+            model: "AW70V",
+            price: 420000,
+            category: "รถเกี่ยวข้าว",
+            serialNumber: "YM-AW70-4491",
+            chassisNumber: "CHS-332910",
+            engineNumber: "ENG-33490",
+            province: "เพชรบูรณ์",
+            amphoe: "หล่มสัก",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449",
+            seller: { name: "เจ๊ดา มะขามหวาน", phone: "086-777-8899", isVerified: true }
+        },
+        {
+            id: "prod-008",
+            brand: "Mitsubishi",
+            model: "HD-200",
+            price: 12000,
+            category: "เครื่องยนต์เกษตร",
+            serialNumber: "MS-HD200-221",
+            chassisNumber: "N/A",
+            engineNumber: "ENG-99231",
+            province: "กำแพงเพชร",
+            amphoe: "พรานกระต่าย",
+            status: "SOLD",
+            imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+            seller: { name: "ลุงมั่นคง คงกระพัน", phone: "087-444-5566", isVerified: false }
+        },
+        {
+            id: "prod-009",
+            brand: "Siam Kubota",
+            model: "KRX-1",
+            price: 85000,
+            category: "รถดำนา",
+            serialNumber: "KB-KRX1-109",
+            chassisNumber: "CHS-441029",
+            engineNumber: "ENG-12093",
+            province: "นครสวรรค์",
+            amphoe: "เก้าเลี้ยว",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854",
+            seller: { name: "คุณวิชัย ทำนาดี", phone: "089-222-3344", isVerified: true }
+        },
+        {
+            id: "prod-010",
+            brand: "NIWA",
+            model: "NW-65",
+            price: 6500,
+            category: "เครื่องตัดหญ้า",
+            serialNumber: "NW-65-992",
+            chassisNumber: "N/A",
+            engineNumber: "ENG-44120",
+            province: "พิจิตร",
+            amphoe: "โพธิ์ประทับช้าง",
+            status: "AVAILABLE",
+            imageUrl: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d",
+            seller: { name: "น้าเดช สวนมะม่วง", phone: "081-999-1122", isVerified: true }
+        }
+    ];
+
+    let currentSelectedProduct = null;
+
+    // Switch Screens Function
+    function switchScreen(screenName) {
+        document.querySelectorAll('.screen-container').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+
+        if (screenName === 'list') {
+            document.getElementById('screen-list').classList.add('active');
+            document.getElementById('tab-home').classList.add('active');
+            document.getElementById('nav-title').innerText = 'ตลาดเครื่องจักรเกษตร';
+            document.getElementById('nav-action-btn').style.display = 'block';
+            renderProductList(products);
+        } else if (screenName === 'detail') {
+            document.getElementById('screen-detail').classList.add('active');
+            document.getElementById('nav-title').innerText = 'รายละเอียดอุปกรณ์';
+            document.getElementById('nav-action-btn').style.display = 'none';
+        } else if (screenName === 'create') {
+            document.getElementById('screen-create').classList.add('active');
+            document.getElementById('tab-sell').classList.add('active');
+            document.getElementById('nav-title').innerText = 'ลงประกาศขาย (3 นาที)';
+            document.getElementById('nav-action-btn').style.display = 'none';
+        }
+    }
+
+    // Render Product List
+    function renderProductList(listToRender) {
+        const container = document.getElementById('product-list-content');
+        if (listToRender.length === 0) {
+            container.innerHTML = `
+                <div class="state-container">
+                    <p class="error-msg">ไม่พบสินค้าที่คุณค้นหา</p>
+                    <button class="btn-primary" onclick="resetSearch()" style="max-width:200px;">ล้างการค้นหา</button>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = listToRender.map(item => `
+            <div class="product-card" onclick="openDetail('${item.id}')">
+                <img src="${item.imageUrl}" class="product-img" alt="${item.brand}">
+                <div class="product-info">
+                    <div class="product-title">${item.brand} ${item.model}</div>
+                    <div class="product-price">฿${item.price.toLocaleString()}</div>
+                    <div class="product-meta">📍 จังหวัด${item.province} (อ.${item.amphoe})</div>
+                    <div class="product-meta">🏷️ ประเภท: ${item.category}</div>
+                    <span class="badge-status" style="background-color: ${item.status === 'AVAILABLE' ? '#e8f5e9' : '#ffebee'}; color: ${item.status === 'AVAILABLE' ? '#2e7d32' : '#c62828'};">
+                        ${item.status === 'AVAILABLE' ? 'พร้อมขาย / ตรวจสอบแล้ว' : 'ขายแล้ว'}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterProducts() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = products.filter(p => 
+            p.brand.toLowerCase().includes(query) ||
+            p.model.toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query) ||
+            p.province.toLowerCase().includes(query)
+        );
+        renderProductList(filtered);
+    }
+
+    function resetSearch() {
+        document.getElementById('searchInput').value = '';
+        renderProductList(products);
+    }
+
+    // Open Detail Screen
+    function openDetail(id) {
+        const product = products.find(p => p.id === id);
+        if (!product) return;
+        currentSelectedProduct = product;
+
+        const container = document.getElementById('product-detail-content');
+        container.innerHTML = `
+            <div class="detail-img-container">
+                <img src="${product.imageUrl}" class="detail-img" alt="${product.brand}">
+            </div>
+            
+            <div class="detail-section">
+                <h2 style="font-size: 22px; color: #1b5e20; margin-bottom: 4px;">${product.brand} ${product.model}</h2>
+                <div style="font-size: 24px; font-weight: 700; color: #e65100; margin-bottom: 8px;">฿${product.price.toLocaleString()}</div>
+                <span class="badge-status">${product.category}</span>
+            </div>
+
+            <div class="detail-section">
+                <h3>📜 ข้อมูลตรวจสอบย้อนกลับ (Legal & Traceability)</h3>
+                <div class="detail-row"><span>เลขทะเบียน/ซีเรียล:</span> <span>${product.serialNumber}</span></div>
+                <div class="detail-row"><span>เลขคัสซี (Chassis):</span> <span>${product.chassisNumber}</span></div>
+                <div class="detail-row"><span>เลขเครื่องยนต์:</span> <span>${product.engineNumber}</span></div>
+                <div class="detail-row"><span>สถานที่ตั้งตามหมุด:</span> <span>อ.${product.amphoe} จ.${product.province}</span></div>
+            </div>
+
+            <div class="detail-section">
+                <h3>👤 ข้อมูลผู้ขาย (ยืนยันตัวตนแล้ว)</h3>
+                <div class="detail-row"><span>ชื่อผู้ขาย:</span> <span>${product.seller.name}</span></div>
+                <div class="detail-row"><span>เบอร์โทรติดต่อ:</span> <span style="color: #2e7d32; font-weight: bold;">${product.seller.phone}</span></div>
+                <div class="detail-row"><span>สถานะ GAP/ตัวตน:</span> <span>${product.seller.isVerified ? '✅ ผ่านการตรวจสอบ' : '⚠️ ทั่วไป'}</span></div>
+            </div>
+        `;
+        switchScreen('detail');
+    }
+
+    // Submit Product (Create)
+    function submitProduct(event) {
+        event.preventDefault();
+        const brand = document.getElementById('f_brand').value;
+        const model = document.getElementById('f_model').value;
+        const price = parseFloat(document.getElementById('f_price').value);
+        const category = document.getElementById('f_category').value;
+        const serialNumber = document.getElementById('f_serial').value;
+        const imageInput = document.getElementById('f_image');
+
+        // จัดการรูปภาพที่เลือกจากคลัง (แปลงเป็น Object URL ชั่วคราวสำหรับการแสดงผลใน MVP)
+        let imageUrl = "https://images.unsplash.com/photo-1592417817098-8f3d69204b5f";
+        if (imageInput.files && imageInput.files[0]) {
+            imageUrl = URL.createObjectURL(imageInput.files[0]);
+        }
+
+        const newProduct = {
+            id: 'prod-' + (products.length + 1),
+            brand,
+            model,
+            price,
+            category,
+            serialNumber,
+            chassisNumber: 'CHS-' + Math.floor(100000 + Math.random() * 900000),
+            engineNumber: 'ENG-' + Math.floor(10000 + Math.random() * 90000),
+            province: 'พิษณุโลก',
+            amphoe: 'เมืองพิษณุโลก',
+            status: 'AVAILABLE',
+            imageUrl,
+            seller: { name: 'คุณเกษตรกร มือใหม่', phone: '085-555-4433', isVerified: true }
+        };
+
+        products.unshift(newProduct);
+        alert('ลงประกาศขายสำเร็จภายใน 3 นาทีเรียบร้อยแล้ว!');
+        document.getElementById('createForm').reset();
+        switchScreen('list');
+    }
+
+    function handleBuyAction() {
+        if (!currentSelectedProduct) return;
+        if (currentSelectedProduct.status === 'SOLD') {
+            alert('สินค้านี้ถูกขายไปแล้วครับ');
+            return;
+        }
+        alert(`ติดต่อผู้ขาย (${currentSelectedProduct.seller.name}) สำเร็จ!\nระบบได้ส่งเบอร์โทร ${currentSelectedProduct.seller.phone} ไปยัง SMS ของท่านแล้วเพื่อทำสัญญาซื้อขายตามกฎหมาย`);
+    }
+
+    // Initial Render
+    renderProductList(products);
+</script>
+
+</body>
+</html>
