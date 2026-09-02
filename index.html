@@ -182,6 +182,74 @@
             <option>เชียงใหม่</option>
             <option>นครราชสีมา</option>
             <option>สุพรรณบุรี</option>
+            <option>กรุงเทพมหานคร</option>
+            <option>กระบี่</option>
+            <option>กาญจนบุรี</option>
+            <option>กาฬสินธุ์</option>
+            <option>ขอนแก่น</option>
+            <option>จันทบุรี</option>
+            <option>ฉะเชิงเทรา</option>
+            <option>ชลบุรี</option>
+            <option>ชัยนาท</option>
+            <option>ชัยภูมิ</option>
+            <option>ชุมพร</option>
+            <option>ตรัง</option>
+            <option>ตราด</option>
+            <option>ตาก</option>
+            <option>นครนายก</option>
+            <option>นครปฐม</option>
+            <option>นครพนม</option>
+            <option>นนทบุรี</option>
+            <option>นราธิวาส</option>
+            <option>น่าน</option>
+            <option>บึงกาฬ</option>
+            <option>บุรีรัมย์</option>
+            <option>ปทุมธานี</option>
+            <option>ประจวบคีรีขันธ์</option>
+            <option>ปราจีนบุรี</option>
+            <option>ปัตตานี</option>
+            <option>พะเยา</option>
+            <option>พังงา</option>
+            <option>พัทลุง</option>
+            <option>พิจิตร</option>
+            <option>เพชรบุรี</option>
+            <option>เพชรบูรณ์</option>
+            <option>แพร่</option>
+            <option>ภูเก็ต</option>
+            <option>มหาสารคาม</option>
+            <option>มุกดาหาร</option>
+            <option>แม่ฮ่องสอน</option>
+            <option>ยโสธร</option>
+            <option>ยะลา</option>
+            <option>ร้อยเอ็ด</option>
+            <option>ระนอง</option>
+            <option>ระยอง</option>
+            <option>ราชบุรี</option>
+            <option>ลพบุรี</option>
+            <option>ลำปาง</option>
+            <option>ลำพูน</option>
+            <option>เลย</option>
+            <option>ศรีสะเกษ</option>
+            <option>สกลนคร</option>
+            <option>สงขลา</option>
+            <option>สตูล</option>
+            <option>สมุทรปราการ</option>
+            <option>สมุทรสงคราม</option>
+            <option>สมุทรสาคร</option>
+            <option>สระแก้ว</option>
+            <option>สระบุรี</option>
+            <option>สิงห์บุรี</option>
+            <option>สุโขทัย</option>
+            <option>สุราษฎร์ธานี</option>
+            <option>สุรินทร์</option>
+            <option>หนองคาย</option>
+            <option>หนองบัวลำภู</option>
+            <option>อ่างทอง</option>
+            <option>อำนาจเจริญ</option>
+            <option>อุดรธานี</option>
+            <option>อุตรดิตถ์</option>
+            <option>อุทัยธานี</option>
+            <option>อุบลราชธานี</option>
           </select>
           <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})" class="h-12 px-7 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold flex items-center justify-center gap-2 transition">
             <i data-lucide="search" class="w-4 h-4"></i>
@@ -369,6 +437,8 @@
             <option>เชียงใหม่</option>
             <option>นครราชสีมา</option>
             <option>สุพรรณบุรี</option>
+            <option>กรุงเทพมหานคร</option>
+            <option>กระบี่</option>
           </select>
         </div>
       </div>
@@ -666,8 +736,16 @@
                 <div class="text-xs text-slate-500 mt-0.5">เลือกได้สูงสุด 8 รูป ระบบจะย่อรูปให้อัตโนมัติเพื่อเก็บในเบราว์เซอร์</div>
               </div>
             </div>
-            <input id="listingImages" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple required class="mt-4 text-sm w-full">
-            <div id="listingImagePreview" class="grid grid-cols-4 gap-2 mt-4"></div>
+            <input id="listingImages" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <button type="button" onclick="document.getElementById('listingImages').click()"
+                class="px-4 h-10 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-sm font-semibold flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                เพิ่มรูปภาพ
+              </button>
+              <span id="listingImageCount" class="text-xs text-slate-500">0/8 รูป</span>
+            </div>
+            <div id="listingImagePreview" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4"></div>
           </div>
 
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
@@ -871,6 +949,8 @@
 
     const USER_LISTINGS_KEY = 'agrimarket_user_listings_v1';
     const LISTING_IMAGE_MAX = 8;
+    // รูปภาพในฟอร์มลงประกาศ: รองรับการเพิ่มทีละหลายครั้ง รวมสูงสุด 8 รูป
+    let listingImageItems = [];
     let savedSearches = [];
     let chatThreads = {}; // { productId: [{from:'buyer'|'seller', text}] }
     let favorites = new Set();
@@ -1501,9 +1581,13 @@
         form.elements.hours.value = listing.hours || '';
         form.elements.desc.value = listing.desc || '';
       }
-      document.getElementById('listingImagePreview').innerHTML = (listing?.images || (listing?.image ? [listing.image] : [])).map(src =>
-        `<div class="relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white"><img src="${src}" class="w-full h-full object-cover"></div>`
-      ).join('');
+      // เตรียมรูปเดิมสำหรับโหมดแก้ไข และเริ่มใหม่สำหรับประกาศใหม่
+      const existingImages = listing?.images || (listing?.image ? [listing.image] : []);
+      listingImageItems = existingImages.slice(0, LISTING_IMAGE_MAX).map(src => ({
+        src,
+        file: null
+      }));
+      renderListingImagePreview();
       openModal('listingModal');
     }
 
@@ -1535,17 +1619,83 @@
       });
     }
 
+    function renderListingImagePreview() {
+      const preview = document.getElementById('listingImagePreview');
+      const count = document.getElementById('listingImageCount');
+
+      preview.innerHTML = listingImageItems.map((item, index) => `
+        <div class="relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white group">
+          <img src="${item.src}" class="w-full h-full object-cover" alt="รูปสินค้า ${index + 1}">
+          ${index === 0 ? `
+            <span class="absolute left-2 top-2 px-2 py-1 rounded-lg bg-farm-600 text-white text-[10px] font-semibold shadow">
+              รูปหลัก
+            </span>` : ''}
+          <button type="button"
+            onclick="removeListingImage(${index})"
+            class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-950/70 text-white grid place-items-center hover:bg-rose-600 transition"
+            title="ลบรูปนี้">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('');
+
+      count.textContent = `${listingImageItems.length}/${LISTING_IMAGE_MAX} รูป`;
+
+      lucide.createIcons();
+    }
+
     function previewListingImages() {
       const input = document.getElementById('listingImages');
-      const preview = document.getElementById('listingImagePreview');
-      const files = Array.from(input.files || []).slice(0, LISTING_IMAGE_MAX);
-      if (input.files.length > LISTING_IMAGE_MAX) setListingError(`เลือกได้สูงสุด ${LISTING_IMAGE_MAX} รูป ระบบจะใช้เฉพาะ ${LISTING_IMAGE_MAX} รูปแรก`);
-      else document.getElementById('listingFormError').classList.add('hidden');
-      preview.innerHTML = '';
-      files.forEach(file => {
-        const url = URL.createObjectURL(file);
-        preview.insertAdjacentHTML('beforeend', `<div class="relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white"><img src="${url}" class="w-full h-full object-cover"></div>`);
+      const selectedFiles = Array.from(input.files || []);
+
+      if (!selectedFiles.length) return;
+
+      const remaining = LISTING_IMAGE_MAX - listingImageItems.length;
+
+      if (remaining <= 0) {
+        setListingError(`เพิ่มรูปได้สูงสุด ${LISTING_IMAGE_MAX} รูป`);
+        input.value = '';
+        return;
+      }
+
+      const validFiles = selectedFiles
+        .filter(file => /^image\/(jpeg|png|webp)$/i.test(file.type))
+        .slice(0, remaining);
+
+      if (selectedFiles.length > remaining) {
+        setListingError(`เพิ่มได้อีก ${remaining} รูป ระบบจะใช้เฉพาะรูปที่เลือกตามจำนวนที่เหลือ`);
+      } else if (validFiles.length !== selectedFiles.length) {
+        setListingError('รองรับเฉพาะไฟล์ JPG, PNG และ WebP');
+      } else {
+        document.getElementById('listingFormError').classList.add('hidden');
+      }
+
+      validFiles.forEach(file => {
+        listingImageItems.push({
+          src: URL.createObjectURL(file),
+          file
+        });
       });
+
+      // ล้าง input เพื่อให้ผู้ใช้กด "เพิ่มรูปภาพ" แล้วเลือกชุดใหม่ได้อีกครั้ง
+      input.value = '';
+      renderListingImagePreview();
+    }
+
+    function removeListingImage(index) {
+      const item = listingImageItems[index];
+
+      // คืน URL ชั่วคราวของไฟล์ใหม่
+      if (item?.file && item.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(item.src);
+      }
+
+      listingImageItems.splice(index, 1);
+      renderListingImagePreview();
+
+      if (listingImageItems.length < LISTING_IMAGE_MAX) {
+        document.getElementById('listingFormError').classList.add('hidden');
+      }
     }
 
     async function submitListing(e, forcedStatus=null) {
@@ -1562,7 +1712,6 @@
       const title = String(data.get('title') || '').trim();
       const desc = String(data.get('desc') || '').trim();
       const price = Number(data.get('price'));
-      const files = Array.from(document.getElementById('listingImages').files || []).slice(0, LISTING_IMAGE_MAX);
       const existing = form.elements.listingId.value;
       const storedItems = getUserListings();
       const old = storedItems.find(x => String(x.id) === String(existing));
@@ -1570,8 +1719,12 @@
       if (!title || title.length < 3) return setListingError('กรุณากรอกชื่อสินค้าอย่างน้อย 3 ตัวอักษร');
       if (!Number.isFinite(price) || price <= 0) return setListingError('กรุณาระบุราคาที่มากกว่า 0 บาท');
       if (!desc || desc.length < 10) return setListingError('กรุณาใส่รายละเอียดสินค้าอย่างน้อย 10 ตัวอักษร');
-      if (!old && files.length === 0) return setListingError('กรุณาเลือกรูปสินค้าอย่างน้อย 1 รูปก่อนลงประกาศ');
-      if (old && files.length === 0 && !(old.images || []).length) return setListingError('กรุณาเลือกรูปสินค้าอย่างน้อย 1 รูป');
+      if (!listingImageItems.length) return setListingError('กรุณาเลือกรูปสินค้าอย่างน้อย 1 รูปก่อนลงประกาศ');
+      if (listingImageItems.length > LISTING_IMAGE_MAX) return setListingError(`รูปสินค้าเกิน ${LISTING_IMAGE_MAX} รูป`);
+
+      const newImageFiles = listingImageItems
+        .filter(item => item.file)
+        .map(item => item.file);
 
       const submitButton = form.querySelector('button[type="submit"]');
       if (submitButton) {
@@ -1580,7 +1733,16 @@
       }
 
       try {
-        const images = files.length ? await Promise.all(files.map(f => compressImage(f))) : (old?.images || []);
+        const newImages = newImageFiles.length
+          ? await Promise.all(newImageFiles.map(f => compressImage(f)))
+          : [];
+
+        // รักษาลำดับรูปเดิม และแทนที่ blob URL ของไฟล์ใหม่ด้วย base64 ที่บีบอัดแล้ว
+        let newImageIndex = 0;
+        const images = listingImageItems.map(item => {
+          if (item.file) return newImages[newImageIndex++];
+          return item.src;
+        }).slice(0, LISTING_IMAGE_MAX);
         const category = String(data.get('category'));
         const categoryLabelMap = {
           tractor:'รถแทรกเตอร์', harvester:'รถเกี่ยว', drone:'โดรนการเกษตร',
@@ -1611,7 +1773,11 @@
 
         closeModal('listingModal');
         form.reset();
-        document.getElementById('listingImagePreview').innerHTML = '';
+        listingImageItems.forEach(item => {
+          if (item.file && item.src?.startsWith('blob:')) URL.revokeObjectURL(item.src);
+        });
+        listingImageItems = [];
+        renderListingImagePreview();
         applyFilters();
         showToast(item.status === 'draft' ? `บันทึกแบบร่าง "${title}" แล้ว` : `ลงประกาศ "${title}" สำเร็จแล้ว`);
       } catch (err) {
