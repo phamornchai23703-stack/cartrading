@@ -1834,5 +1834,1397 @@
     renderProducts();
     updateAuthUI();
   </script>
+<style id="agrimarket-system-enhancements">
+  .system-status-dot { box-shadow: 0 0 0 4px rgba(34,197,94,.10); }
+  .system-modal-scroll { max-height: 88vh; overflow-y: auto; }
+  .status-track { position: relative; }
+  .status-track::before { content:""; position:absolute; left:13px; top:14px; bottom:14px; width:2px; background:#e2e8f0; }
+  .status-step { position:relative; z-index:1; }
+  .mini-bar { transition: width .35s ease; }
+</style>
+
+<script id="agrimarket-system-enhancements-js">
+(() => {
+  'use strict';
+
+  const ORDERS_KEY = 'agrimarket_orders_v1';
+  const NOTIFICATIONS_KEY = 'agrimarket_notifications_v1';
+  const REPORTS_KEY = 'agrimarket_reports_v1';
+  const REVIEWS_KEY = 'agrimarket_reviews_v1';
+  const PROFILES_KEY = 'agrimarket_profiles_v1';
+  const SAVED_SEARCHES_KEY = 'agrimarket_saved_searches_v1';
+
+  const ORDER_STATUS = {
+    pending_seller: { label:'รอผู้ขายยืนยัน', color:'amber', icon:'clock-3' },
+    awaiting_payment: { label:'รอชำระเงิน', color:'blue', icon:'wallet-cards' },
+    paid: { label:'ชำระเงินแล้ว / เตรียมจัดส่ง', color:'indigo', icon:'package-check' },
+    shipped: { label:'กำลังจัดส่ง', color:'violet', icon:'truck' },
+    completed: { label:'ปิดการขาย / สำเร็จ', color:'green', icon:'badge-check' },
+    cancelled: { label:'ยกเลิก', color:'rose', icon:'circle-x' }
+  };
+
+  const PROVINCES = (() => {
+    const select = document.getElementById('heroProvince');
+    if (!select) return ['กรุงเทพมหานคร','พิษณุโลก','นครสวรรค์','กำแพงเพชร','เชียงใหม่','นครราชสีมา','สุพรรณบุรี'];
+    return Array.from(select.options).map(o => o.value || o.textContent).filter(v => v && v !== 'all' && v !== 'ทุกจังหวัด');
+  })();
+
+  function safeJsonParse(raw, fallback) {
+    try { return JSON.parse(raw); } catch { return fallback; }
+  }
+
+  function getOrders() {
+    return safeJsonParse(localStorage.getItem(ORDERS_KEY) || '[]', []);
+  }
+
+  function saveOrders(items) {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(items));
+  }
+
+  function getNotifications() {
+    return safeJsonParse(localStorage.getItem(NOTIFICATIONS_KEY) || '[]', []);
+  }
+
+  function saveNotifications(items) {
+    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(items.slice(-300)));
+    updateNotificationBadges();
+  }
+
+  function getReports() {
+    return safeJsonParse(localStorage.getItem(REPORTS_KEY) || '[]', []);
+  }
+
+  function saveReports(items) {
+    localStorage.setItem(REPORTS_KEY, JSON.stringify(items));
+  }
+
+  function getReviews() {
+    return safeJsonParse(localStorage.getItem(REVIEWS_KEY) || '[]', []);
+  }
+
+  function saveReviews(items) {
+    localStorage.setItem(REVIEWS_KEY, JSON.stringify(items));
+  }
+
+  function getProfiles() {
+    return safeJsonParse(localStorage.getItem(PROFILES_KEY) || '{}', {});
+  }
+
+  function saveProfiles(items) {
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(items));
+  }
+
+  function getSavedSearchesPersisted() {
+    return safeJsonParse(localStorage.getItem(SAVED_SEARCHES_KEY) || '[]', []);
+  }
+
+  function saveSavedSearchesPersisted(items) {
+    localStorage.setItem(SAVED_SEARCHES_KEY, JSON.stringify(items.slice(-100)));
+  }
+
+  function currentUserId() {
+    return typeof getCurrentUser === 'function' ? getCurrentUser()?.id || null : null;
+  }
+
+  function currentUser() {
+    return typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  }
+
+  function addNotification(title, message, type='info', userId=currentUserId(), linkType='system', linkId=null) {
+    const items = getNotifications();
+    items.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : `n_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      userId,
+      title,
+      message,
+      type,
+      linkType,
+      linkId,
+      read:false,
+      createdAt:new Date().toISOString()
+    });
+    saveNotifications(items);
+  }
+
+  function updateNotificationBadges() {
+    const userId = currentUserId();
+    const unread = getNotifications().filter(n => !n.read && (!n.userId || n.userId === userId)).length;
+    const badge = document.getElementById('savedSearchCount');
+    if (badge) {
+      badge.textContent = unread;
+      badge.classList.toggle('hidden', unread === 0);
+      badge.classList.toggle('flex', unread > 0);
+    }
+    const hubBadge = document.getElementById('systemOrderBadge');
+    if (hubBadge) {
+      const count = getOrders().filter(o => o.buyerId === userId || o.sellerId === userId)
+        .filter(o => !['completed','cancelled'].includes(o.status)).length;
+      hubBadge.textContent = count;
+      hubBadge.classList.toggle('hidden', count === 0);
+    }
+  }
+
+  function statusClass(status) {
+    const meta = ORDER_STATUS[status] || ORDER_STATUS.pending_seller;
+    const map = {
+      amber:'bg-amber-50 text-amber-700 border-amber-100',
+      blue:'bg-blue-50 text-blue-700 border-blue-100',
+      indigo:'bg-indigo-50 text-indigo-700 border-indigo-100',
+      violet:'bg-violet-50 text-violet-700 border-violet-100',
+      green:'bg-green-50 text-green-700 border-green-100',
+      rose:'bg-rose-50 text-rose-700 border-rose-100'
+    };
+    return map[meta.color] || map.blue;
+  }
+
+  function moneySafe(n) {
+    return typeof money === 'function' ? money(n) : new Intl.NumberFormat('th-TH').format(Number(n) || 0);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[ch]));
+  }
+
+  function injectEnhancementMarkup() {
+    if (document.getElementById('systemHubModal')) return;
+
+    const html = `
+      <div id="systemHubModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('systemHubModal')"></div>
+        <div class="relative w-full max-w-xl max-h-[88vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('systemHubModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl hover:bg-slate-100 grid place-items-center"><i data-lucide="x"></i></button>
+          <span class="text-xs text-farm-600 font-semibold">SYSTEM CENTER</span>
+          <h2 class="text-2xl font-bold mt-1">ศูนย์ระบบ AgriMarket</h2>
+          <p class="text-sm text-slate-500 mt-1">รวมคำสั่งซื้อ การแจ้งเตือน โปรไฟล์ และรายงานไว้ในจุดเดียว</p>
+
+          <div id="systemRoleSummary" class="mt-5 rounded-2xl bg-farm-50 border border-farm-100 p-4"></div>
+
+          <div class="grid sm:grid-cols-2 gap-3 mt-5">
+            <button onclick="openUserDashboard(); closeModal('systemHubModal')" class="text-left rounded-2xl border border-slate-200 p-4 hover:border-farm-300 hover:bg-farm-50 transition">
+              <div class="w-10 h-10 rounded-xl bg-green-50 text-farm-700 grid place-items-center"><i data-lucide="layout-dashboard"></i></div>
+              <div class="font-semibold mt-3">Dashboard ของฉัน</div>
+              <div class="text-xs text-slate-500 mt-1">ยอดประกาศ คำสั่งซื้อ รายได้ ค่าใช้จ่าย และสถิติ</div>
+            </button>
+            <button onclick="openOrdersModal(); closeModal('systemHubModal')" class="relative text-left rounded-2xl border border-slate-200 p-4 hover:border-blue-300 hover:bg-blue-50 transition">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 grid place-items-center"><i data-lucide="shopping-bag"></i></div>
+              <div class="font-semibold mt-3">คำสั่งซื้อ / ธุรกรรม</div>
+              <div class="text-xs text-slate-500 mt-1">ติดตามสถานะตั้งแต่สั่งซื้อจนปิดงาน</div>
+              <span id="systemOrderBadge" class="hidden absolute top-4 right-4 min-w-5 h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold items-center justify-center">0</span>
+            </button>
+            <button onclick="openNotificationCenter(); closeModal('systemHubModal')" class="text-left rounded-2xl border border-slate-200 p-4 hover:border-amber-300 hover:bg-amber-50 transition">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 grid place-items-center"><i data-lucide="bell"></i></div>
+              <div class="font-semibold mt-3">ศูนย์แจ้งเตือน</div>
+              <div class="text-xs text-slate-500 mt-1">สินค้าใหม่ คำสั่งซื้อ การชำระเงิน และการจัดส่ง</div>
+            </button>
+            <button onclick="openProfileModal(); closeModal('systemHubModal')" class="text-left rounded-2xl border border-slate-200 p-4 hover:border-violet-300 hover:bg-violet-50 transition">
+              <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 grid place-items-center"><i data-lucide="user-round-cog"></i></div>
+              <div class="font-semibold mt-3">โปรไฟล์และที่อยู่</div>
+              <div class="text-xs text-slate-500 mt-1">จัดการที่อยู่ จังหวัด อำเภอ ตำบล และข้อมูลติดต่อ</div>
+            </button>
+            <button onclick="openSellerDashboard(); closeModal('systemHubModal')" class="text-left rounded-2xl border border-slate-200 p-4 hover:border-green-300 hover:bg-green-50 transition">
+              <div class="w-10 h-10 rounded-xl bg-green-50 text-green-700 grid place-items-center"><i data-lucide="store"></i></div>
+              <div class="font-semibold mt-3">แดชบอร์ดผู้ขายเดิม</div>
+              <div class="text-xs text-slate-500 mt-1">จัดการประกาศที่มีอยู่ในรูปแบบเดิม</div>
+            </button>
+            <button id="adminHubButton" onclick="openAdminDashboard(); closeModal('systemHubModal')" class="hidden text-left rounded-2xl border border-slate-200 p-4 hover:border-rose-300 hover:bg-rose-50 transition">
+              <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 grid place-items-center"><i data-lucide="shield-check"></i></div>
+              <div class="font-semibold mt-3">หลังบ้านผู้ดูแล</div>
+              <div class="text-xs text-slate-500 mt-1">ผู้ใช้ ประกาศ ธุรกรรม รายงาน และการยืนยันผู้ขาย</div>
+            </button>
+          </div>
+
+          <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500 leading-relaxed">
+            <span class="font-semibold text-slate-700">หมายเหตุ:</span> โมดูลที่เพิ่มเข้ามายังคงใช้ localStorage/sessionStorage เพื่อให้สอดคล้องกับต้นฉบับที่เป็น HTML ต้นแบบ และสามารถนำไปต่อกับ Backend/Database ภายหลังได้
+          </div>
+        </div>
+      </div>
+
+      <div id="ordersModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('ordersModal')"></div>
+        <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('ordersModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <div class="pr-10">
+            <span class="text-xs text-blue-600 font-semibold">TRANSACTION CENTER</span>
+            <h2 class="text-2xl font-bold mt-1">คำสั่งซื้อและการติดตามสถานะ</h2>
+            <p class="text-sm text-slate-500 mt-1">รายการธุรกรรมที่คุณเป็นผู้ซื้อหรือผู้ขาย</p>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-5">
+            <button onclick="renderOrders('all')" data-order-filter="all" class="px-3 h-9 rounded-xl bg-slate-900 text-white text-xs font-semibold">ทั้งหมด</button>
+            <button onclick="renderOrders('active')" data-order-filter="active" class="px-3 h-9 rounded-xl border border-slate-200 text-xs font-semibold">กำลังดำเนินการ</button>
+            <button onclick="renderOrders('completed')" data-order-filter="completed" class="px-3 h-9 rounded-xl border border-slate-200 text-xs font-semibold">สำเร็จ</button>
+            <button onclick="renderOrders('cancelled')" data-order-filter="cancelled" class="px-3 h-9 rounded-xl border border-slate-200 text-xs font-semibold">ยกเลิก</button>
+          </div>
+          <div id="ordersList" class="space-y-3 mt-5"></div>
+        </div>
+      </div>
+
+      <div id="orderDetailModal" class="fixed inset-0 z-[71] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('orderDetailModal')"></div>
+        <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('orderDetailModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <div id="orderDetailContent"></div>
+        </div>
+      </div>
+
+      <div id="checkoutModal" class="fixed inset-0 z-[72] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('checkoutModal')"></div>
+        <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('checkoutModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <span class="text-xs text-farm-600 font-semibold">CREATE ORDER</span>
+          <h2 class="text-2xl font-bold mt-1">สร้างคำสั่งซื้อ</h2>
+          <p class="text-sm text-slate-500 mt-1">ระบบจะคำนวณค่าขนส่ง ค่าบริการ และยอดชำระให้อัตโนมัติ</p>
+          <div id="checkoutProductCard" class="mt-5"></div>
+          <div class="grid sm:grid-cols-2 gap-4 mt-5">
+            <div>
+              <label class="text-xs font-medium text-slate-500">จังหวัดผู้ซื้อ</label>
+              <select id="checkoutBuyerProvince" onchange="recalculateCheckout()" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm"></select>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-slate-500">วิธีรับสินค้า</label>
+              <select id="checkoutDelivery" onchange="recalculateCheckout()" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm">
+                <option value="delivery">จัดส่งถึงที่</option>
+                <option value="pickup">นัดรับสินค้า / รับเอง</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-slate-500">วิธีชำระเงิน</label>
+              <select id="checkoutPayment" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm">
+                <option value="escrow">พักเงินกลาง (Escrow Demo)</option>
+                <option value="bank">โอนผ่านธนาคาร (Demo)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-slate-500">หมายเหตุถึงผู้ขาย</label>
+              <input id="checkoutNote" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 text-sm" placeholder="เช่น ขอส่งวันเสาร์ / นัดดูสินค้าก่อน">
+            </div>
+          </div>
+          <div id="checkoutSummary" class="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-5"></div>
+          <button onclick="createOrderFromCheckout()" class="mt-5 w-full h-12 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i> ยืนยันสร้างคำสั่งซื้อ
+          </button>
+          <div class="mt-3 text-[11px] text-slate-400 text-center">คำสั่งซื้อในต้นแบบนี้ยังไม่เชื่อมต่อ Payment Gateway จริง</div>
+        </div>
+      </div>
+
+      <div id="notificationsModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('notificationsModal')"></div>
+        <div class="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('notificationsModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <div class="flex items-start justify-between gap-4 pr-10">
+            <div>
+              <span class="text-xs text-amber-600 font-semibold">NOTIFICATION CENTER</span>
+              <h2 class="text-2xl font-bold mt-1">ศูนย์แจ้งเตือน</h2>
+              <p class="text-sm text-slate-500 mt-1">รวมการแจ้งเตือนสินค้าใหม่ คำสั่งซื้อ และสถานะการชำระเงิน/จัดส่ง</p>
+            </div>
+            <button onclick="markAllNotificationsRead()" class="text-xs font-semibold text-farm-700 hover:underline whitespace-nowrap">อ่านทั้งหมด</button>
+          </div>
+          <div id="notificationList" class="space-y-3 mt-6"></div>
+        </div>
+      </div>
+
+      <div id="profileModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('profileModal')"></div>
+        <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('profileModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <span class="text-xs text-violet-600 font-semibold">PROFILE & ADDRESS</span>
+          <h2 class="text-2xl font-bold mt-1">โปรไฟล์และที่อยู่</h2>
+          <p class="text-sm text-slate-500 mt-1">ใช้ข้อมูลนี้สำหรับการติดต่อ นัดรับ และคำนวณการจัดส่ง</p>
+          <form id="profileForm" onsubmit="saveProfile(event)" class="space-y-4 mt-6">
+            <div>
+              <label class="text-sm font-medium">ชื่อผู้ใช้</label>
+              <input id="profileName" readonly class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 bg-slate-50">
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium">อีเมล</label>
+                <input id="profileEmail" readonly class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 bg-slate-50">
+              </div>
+              <div>
+                <label class="text-sm font-medium">เบอร์โทร</label>
+                <input id="profilePhone" readonly class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 bg-slate-50">
+              </div>
+            </div>
+            <div>
+              <label class="text-sm font-medium">ที่อยู่</label>
+              <textarea id="profileAddress" rows="3" class="mt-1 w-full rounded-xl border border-slate-200 p-3" placeholder="บ้านเลขที่ หมู่ ถนน"></textarea>
+            </div>
+            <div class="grid sm:grid-cols-3 gap-3">
+              <div>
+                <label class="text-sm font-medium">จังหวัด</label>
+                <select id="profileProvince" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm"></select>
+              </div>
+              <div>
+                <label class="text-sm font-medium">อำเภอ</label>
+                <input id="profileDistrict" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm" placeholder="อำเภอ">
+              </div>
+              <div>
+                <label class="text-sm font-medium">ตำบล</label>
+                <input id="profileSubdistrict" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3 text-sm" placeholder="ตำบล">
+              </div>
+            </div>
+            <div>
+              <label class="text-sm font-medium">รหัสไปรษณีย์</label>
+              <input id="profileZip" inputmode="numeric" maxlength="5" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-4 text-sm" placeholder="65000">
+            </div>
+            <button class="w-full h-11 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold">บันทึกข้อมูล</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="userDashboardModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('userDashboardModal')"></div>
+        <div class="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('userDashboardModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <div class="pr-10">
+            <span class="text-xs text-farm-600 font-semibold">PERSONAL DASHBOARD</span>
+            <h2 class="text-2xl font-bold mt-1">Dashboard ของฉัน</h2>
+            <p id="dashboardWelcome" class="text-sm text-slate-500 mt-1"></p>
+          </div>
+          <div id="dashboardStats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6"></div>
+          <div class="grid lg:grid-cols-2 gap-5 mt-6">
+            <div class="rounded-2xl border border-slate-200 p-5">
+              <div class="font-semibold flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-farm-700"></i> สรุปยอดธุรกรรม 6 เดือน</div>
+              <div id="dashboardChart" class="mt-5 space-y-3"></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 p-5">
+              <div class="font-semibold flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4 text-farm-700"></i> สรุปตามสถานะ</div>
+              <div id="dashboardStatusSummary" class="mt-4 space-y-3"></div>
+            </div>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-5 mt-5">
+            <div class="rounded-2xl border border-slate-200 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <div class="font-semibold">กิจกรรมล่าสุด</div>
+                <button onclick="openOrdersModal()" class="text-xs text-farm-700 font-semibold hover:underline">ดูทั้งหมด</button>
+              </div>
+              <div id="dashboardRecent" class="space-y-3 mt-4"></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 p-5">
+              <div class="font-semibold">ความปลอดภัยและการยืนยัน</div>
+              <div id="dashboardVerification" class="mt-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="adminDashboardModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/70 modal-backdrop" onclick="closeModal('adminDashboardModal')"></div>
+        <div class="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('adminDashboardModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <div class="pr-10">
+            <span class="text-xs text-rose-600 font-semibold">ADMIN CONTROL CENTER</span>
+            <h2 class="text-2xl font-bold mt-1">หลังบ้านผู้ดูแลระบบ</h2>
+            <p class="text-sm text-slate-500 mt-1">จัดการผู้ใช้ ประกาศ ธุรกรรม รายงาน และการยืนยันผู้ขายในต้นแบบ</p>
+          </div>
+          <div id="adminStats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6"></div>
+          <div class="grid lg:grid-cols-2 gap-5 mt-6">
+            <div class="rounded-2xl border border-slate-200 p-5">
+              <div class="font-semibold">ผู้ใช้ล่าสุด</div>
+              <div id="adminUsers" class="space-y-2 mt-4"></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 p-5">
+              <div class="font-semibold">รายงานที่ต้องตรวจสอบ</div>
+              <div id="adminReports" class="space-y-2 mt-4"></div>
+            </div>
+          </div>
+          <div class="rounded-2xl border border-slate-200 p-5 mt-5">
+            <div class="flex items-center justify-between gap-3">
+              <div class="font-semibold">ธุรกรรมล่าสุด</div>
+              <button onclick="openOrdersModal()" class="text-xs text-farm-700 font-semibold hover:underline">เปิดศูนย์ธุรกรรม</button>
+            </div>
+            <div id="adminOrders" class="space-y-2 mt-4"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reviewModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('reviewModal')"></div>
+        <div class="relative w-full max-w-md bg-white rounded-3xl shadow-card p-7">
+          <button onclick="closeModal('reviewModal')" class="absolute top-4 right-4 w-9 h-9 rounded-xl border border-slate-200 grid place-items-center"><i data-lucide="x"></i></button>
+          <span class="text-xs text-amber-600 font-semibold">POST-TRANSACTION REVIEW</span>
+          <h2 class="text-2xl font-bold mt-1">รีวิวหลังการซื้อขาย</h2>
+          <p id="reviewProductTitle" class="text-sm text-slate-500 mt-1"></p>
+          <form onsubmit="submitReview(event)" class="space-y-4 mt-6">
+            <input type="hidden" id="reviewOrderId">
+            <div>
+              <label class="text-sm font-medium">คะแนน</label>
+              <select id="reviewRating" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3">
+                <option value="5">5 ดาว — ดีมาก</option>
+                <option value="4">4 ดาว — ดี</option>
+                <option value="3">3 ดาว — ปานกลาง</option>
+                <option value="2">2 ดาว — ควรปรับปรุง</option>
+                <option value="1">1 ดาว — ต้องแก้ไข</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium">ความคิดเห็น</label>
+              <textarea id="reviewText" rows="4" maxlength="500" required class="mt-1 w-full rounded-xl border border-slate-200 p-3" placeholder="รีวิวการติดต่อ สินค้า และการส่งมอบ"></textarea>
+            </div>
+            <button class="w-full h-11 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold">บันทึกรีวิว</button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    populateProvinceSelects();
+    lucide.createIcons();
+  }
+
+  function populateProvinceSelects() {
+    const selects = [document.getElementById('checkoutBuyerProvince'), document.getElementById('profileProvince')].filter(Boolean);
+    selects.forEach(select => {
+      select.innerHTML = PROVINCES.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+    });
+  }
+
+  function injectSystemHeaderButton() {
+    if (document.getElementById('systemHubButton')) return;
+    const area = document.querySelector('header .max-w-7xl > div > div:last-child');
+    if (!area) return;
+    const button = document.createElement('button');
+    button.id = 'systemHubButton';
+    button.type = 'button';
+    button.onclick = () => openSystemHub();
+    button.className = 'hidden md:flex relative items-center gap-2 px-3 h-10 rounded-xl bg-farm-50 hover:bg-farm-100 text-farm-800 border border-farm-100 transition text-sm font-semibold';
+    button.innerHTML = '<i data-lucide="layers-3" class="w-4 h-4"></i> ศูนย์ระบบ';
+    area.insertBefore(button, area.querySelector('#authArea') || area.lastElementChild);
+    lucide.createIcons();
+  }
+
+  function addLoginDemoNote() {
+    const form = document.getElementById('loginForm');
+    if (!form || document.getElementById('adminDemoNote')) return;
+    const note = document.createElement('div');
+    note.id = 'adminDemoNote';
+    note.className = 'rounded-xl bg-rose-50 border border-rose-100 px-3 py-2 text-[11px] leading-relaxed text-rose-700';
+    note.innerHTML = '<b>บัญชีผู้ดูแลสำหรับต้นแบบ:</b> admin@agrimarket.local / Admin@1234<br><span class="text-rose-600/70">ควรเปลี่ยนหรือปิดบัญชีนี้เมื่อนำไปใช้งานจริง</span>';
+    form.insertAdjacentElement('afterend', note);
+  }
+
+  async function seedDemoAdmin() {
+    if (typeof getUsers !== 'function' || typeof saveUsers !== 'function' || typeof hashPassword !== 'function') return;
+    const users = getUsers();
+    if (users.some(u => u.role === 'admin')) return;
+    try {
+      users.push({
+        id:'admin_demo',
+        name:'ผู้ดูแลระบบ',
+        role:'admin',
+        email:'admin@agrimarket.local',
+        phone:'0800000000',
+        passwordHash:await hashPassword('Admin@1234'),
+        verified:true,
+        createdAt:new Date().toISOString()
+      });
+      saveUsers(users);
+    } catch (e) {
+      console.warn('seed demo admin failed', e);
+    }
+  }
+
+  function updateSystemRoleUI() {
+    const user = currentUser();
+    const box = document.getElementById('systemRoleSummary');
+    const adminBtn = document.getElementById('adminHubButton');
+    if (!box) return;
+    if (!user) {
+      box.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white text-slate-500 grid place-items-center"><i data-lucide="log-in"></i></div>
+          <div><div class="font-semibold">ยังไม่ได้เข้าสู่ระบบ</div><div class="text-xs text-slate-500 mt-1">เข้าสู่ระบบเพื่อใช้งานคำสั่งซื้อ Dashboard และการจัดการข้อมูลส่วนบุคคล</div></div>
+        </div>`;
+      if (adminBtn) adminBtn.classList.add('hidden');
+    } else {
+      const roleText = typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
+      box.innerHTML = `
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white text-farm-700 grid place-items-center font-bold">${escapeHtml((user.name||'U').slice(0,1))}</div>
+            <div><div class="font-semibold">${escapeHtml(user.name)}</div><div class="text-xs text-slate-500 mt-1">${escapeHtml(roleText)}</div></div>
+          </div>
+          <div class="text-right"><div class="text-xs text-slate-400">สถานะบัญชี</div><div class="text-sm font-semibold text-green-700">${user.verified || user.role === 'admin' ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยันผู้ขาย'}</div></div>
+        </div>`;
+      if (adminBtn) adminBtn.classList.toggle('hidden', user.role !== 'admin');
+    }
+    lucide.createIcons();
+  }
+
+  function requireLogin(actionText='ใช้งานส่วนนี้') {
+    const user = currentUser();
+    if (!user) {
+      if (typeof openModal === 'function') openModal('loginModal');
+      if (typeof setAuthError === 'function') setAuthError('loginError', `กรุณาเข้าสู่ระบบเพื่อ${actionText}`);
+      return null;
+    }
+    return user;
+  }
+
+  function openSystemHub() {
+    const user = currentUser();
+    if (!user) {
+      openModal('loginModal');
+      if (typeof setAuthError === 'function') setAuthError('loginError', 'กรุณาเข้าสู่ระบบเพื่อเปิดศูนย์ระบบ');
+      return;
+    }
+    updateSystemRoleUI();
+    updateNotificationBadges();
+    openModal('systemHubModal');
+  }
+
+  function getProductList() {
+    try { return (typeof products !== 'undefined' && Array.isArray(products)) ? products : []; }
+    catch { return []; }
+  }
+
+  function getShippingQuote(from, to) {
+    const distMap = (typeof PROVINCE_DIST_FROM_BKK !== 'undefined' && PROVINCE_DIST_FROM_BKK) ? PROVINCE_DIST_FROM_BKK : {};
+    const distFrom = distMap[from] ?? 0;
+    const distTo = distMap[to] ?? 0;
+    const km = from === to ? 25 : Math.max(30, Math.abs(distFrom - distTo) + 40);
+    const cost = 800 + km * 15;
+    const days = Math.max(1, Math.ceil(km / 300));
+    return { km, cost, days };
+  }
+
+  function calculateFinancials(product, buyerProvince, delivery='delivery') {
+    const itemPrice = Number(product.price) || 0;
+    const shipping = delivery === 'pickup' ? 0 : getShippingQuote(product.province, buyerProvince).cost;
+    const platformFee = Math.round(itemPrice * 0.02);
+    const escrowFee = Math.round(itemPrice * 0.005);
+    const total = itemPrice + shipping + platformFee + escrowFee;
+    const sellerNet = Math.max(0, itemPrice - platformFee);
+    return { itemPrice, shipping, platformFee, escrowFee, total, sellerNet };
+  }
+
+  function openCheckout(productId) {
+    const user = requireLogin('สร้างคำสั่งซื้อ');
+    if (!user) return;
+    const product = getProductList().find(p => p.id === Number(productId));
+    if (!product) return;
+    if (product.ownerId && product.ownerId === user.id) {
+      showToast('ไม่สามารถสร้างคำสั่งซื้อให้ประกาศของตัวเองได้');
+      return;
+    }
+
+    const profile = getProfiles()[user.id] || {};
+    const select = document.getElementById('checkoutBuyerProvince');
+    if (select) select.value = profile.province || product.province || PROVINCES[0];
+
+    document.getElementById('checkoutProductCard').innerHTML = `
+      <div class="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border border-slate-200">
+        <img src="${escapeHtml(product.image)}" class="w-full sm:w-32 h-24 rounded-xl object-cover bg-slate-100">
+        <div class="min-w-0 flex-1">
+          <div class="text-xs text-slate-400">${escapeHtml(product.categoryLabel || '')} • ${escapeHtml(product.brand || '')}</div>
+          <div class="font-semibold mt-1">${escapeHtml(product.title)}</div>
+          <div class="text-xl font-bold mt-2">฿${moneySafe(product.price)}</div>
+          <div class="text-xs text-slate-500 mt-1">ผู้ขาย: ${escapeHtml(product.seller || '-')} • ${escapeHtml(product.province || '-')}</div>
+        </div>
+      </div>`;
+    document.getElementById('checkoutModal').dataset.productId = product.id;
+    document.getElementById('checkoutNote').value = '';
+    document.getElementById('checkoutDelivery').value = 'delivery';
+    document.getElementById('checkoutPayment').value = 'escrow';
+    recalculateCheckout();
+    closeModal('detailModal');
+    openModal('checkoutModal');
+  }
+
+  function recalculateCheckout() {
+    const id = Number(document.getElementById('checkoutModal')?.dataset.productId);
+    const product = getProductList().find(p => p.id === id);
+    if (!product) return;
+    const buyerProvince = document.getElementById('checkoutBuyerProvince').value;
+    const delivery = document.getElementById('checkoutDelivery').value;
+    const f = calculateFinancials(product, buyerProvince, delivery);
+    const quote = getShippingQuote(product.province, buyerProvince);
+    document.getElementById('checkoutSummary').innerHTML = `
+      <div class="flex items-center justify-between text-sm"><span class="text-slate-500">ราคาสินค้า</span><b>฿${moneySafe(f.itemPrice)}</b></div>
+      <div class="flex items-center justify-between text-sm mt-2"><span class="text-slate-500">ค่าขนส่งโดยประมาณ</span><b>฿${moneySafe(f.shipping)}</b></div>
+      <div class="flex items-center justify-between text-sm mt-2"><span class="text-slate-500">ค่าบริการแพลตฟอร์ม 2%</span><b>฿${moneySafe(f.platformFee)}</b></div>
+      <div class="flex items-center justify-between text-sm mt-2"><span class="text-slate-500">ค่าพักเงินกลาง 0.5%</span><b>฿${moneySafe(f.escrowFee)}</b></div>
+      <div class="border-t border-slate-200 mt-4 pt-4 flex items-center justify-between"><span class="font-semibold">ยอดรวมที่ผู้ซื้อชำระ</span><span class="text-2xl font-bold text-farm-700">฿${moneySafe(f.total)}</span></div>
+      ${delivery === 'delivery' ? `<div class="text-[11px] text-slate-400 mt-2">ระยะทางโดยประมาณ ${moneySafe(quote.km)} กม. • ประมาณ ${quote.days} วัน • ค่าขนส่งเป็นราคาประมาณการ</div>` : `<div class="text-[11px] text-slate-400 mt-2">เลือกนัดรับ/รับเอง จึงไม่คิดค่าขนส่งในรายการนี้</div>`}
+      <div class="mt-3 rounded-xl bg-green-50 border border-green-100 p-3 text-xs text-green-800">ผู้ขายจะได้รับประมาณ ฿${moneySafe(f.sellerNet)} หลังหักค่าบริการแพลตฟอร์ม โดยไม่รวมค่าใช้จ่ายอื่นที่อาจเกิดขึ้นจริง</div>`;
+  }
+
+  function createOrderFromCheckout() {
+    const user = requireLogin('สร้างคำสั่งซื้อ');
+    if (!user) return;
+    const modal = document.getElementById('checkoutModal');
+    const productId = Number(modal.dataset.productId);
+    const product = getProductList().find(p => p.id === productId);
+    if (!product) return;
+
+    const buyerProvince = document.getElementById('checkoutBuyerProvince').value;
+    const delivery = document.getElementById('checkoutDelivery').value;
+    const payment = document.getElementById('checkoutPayment').value;
+    const note = document.getElementById('checkoutNote').value.trim();
+    const f = calculateFinancials(product, buyerProvince, delivery);
+
+    const orders = getOrders();
+    const order = {
+      id:`AGM-${new Date().getFullYear()}-${String(Date.now()).slice(-8)}`,
+      buyerId:user.id,
+      buyerName:user.name,
+      sellerId:product.ownerId || product.sellerId || null,
+      sellerName:product.seller || 'ผู้ขาย',
+      productId:product.id,
+      productTitle:product.title,
+      productImage:product.image,
+      productProvince:product.province,
+      buyerProvince,
+      delivery,
+      payment,
+      note,
+      pricing:f,
+      status:'pending_seller',
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+      history:[{status:'pending_seller', at:new Date().toISOString(), by:user.id}]
+    };
+    orders.push(order);
+    saveOrders(orders);
+
+    if (order.sellerId) {
+      addNotification('มีคำสั่งซื้อใหม่', `มีผู้ซื้อสร้างคำสั่งซื้อ ${order.id} สำหรับ ${order.productTitle}`, 'order', order.sellerId, 'order', order.id);
+    }
+    addNotification('สร้างคำสั่งซื้อสำเร็จ', `คำสั่งซื้อ ${order.id} อยู่ในสถานะรอผู้ขายยืนยัน`, 'success', user.id, 'order', order.id);
+
+    closeModal('checkoutModal');
+    showToast(`สร้างคำสั่งซื้อ ${order.id} เรียบร้อยแล้ว`);
+    updateNotificationBadges();
+    openOrderDetail(order.id);
+  }
+
+  function orderVisibleToUser(order, user) {
+    return !!user && (order.buyerId === user.id || order.sellerId === user.id || user.role === 'admin');
+  }
+
+  function renderOrders(filter='all') {
+    const user = currentUser();
+    if (!user) return;
+    const list = document.getElementById('ordersList');
+    if (!list) return;
+
+    let orders = getOrders().filter(o => orderVisibleToUser(o, user));
+    if (filter === 'active') orders = orders.filter(o => !['completed','cancelled'].includes(o.status));
+    if (filter === 'completed') orders = orders.filter(o => o.status === 'completed');
+    if (filter === 'cancelled') orders = orders.filter(o => o.status === 'cancelled');
+    orders.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+    document.querySelectorAll('[data-order-filter]').forEach(btn => {
+      const active = btn.dataset.orderFilter === filter;
+      btn.classList.toggle('bg-slate-900', active);
+      btn.classList.toggle('text-white', active);
+      btn.classList.toggle('border', !active);
+      btn.classList.toggle('border-slate-200', !active);
+    });
+
+    if (!orders.length) {
+      list.innerHTML = `<div class="py-14 text-center border border-dashed border-slate-200 rounded-2xl text-sm text-slate-500">ยังไม่มีรายการในหมวดนี้</div>`;
+      lucide.createIcons();
+      return;
+    }
+
+    list.innerHTML = orders.map(o => {
+      const meta = ORDER_STATUS[o.status] || ORDER_STATUS.pending_seller;
+      const isBuyer = user.id === o.buyerId;
+      return `
+        <button onclick="openOrderDetail('${escapeHtml(o.id)}')" class="w-full text-left rounded-2xl border border-slate-200 p-4 hover:border-farm-200 hover:bg-farm-50/30 transition">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start gap-3 min-w-0">
+              <img src="${escapeHtml(o.productImage)}" class="w-16 h-16 rounded-xl object-cover bg-slate-100 shrink-0">
+              <div class="min-w-0">
+                <div class="text-xs text-slate-400">${escapeHtml(o.id)} • ${isBuyer ? 'ผู้ซื้อ' : 'ผู้ขาย'}</div>
+                <div class="font-semibold mt-1 truncate">${escapeHtml(o.productTitle)}</div>
+                <div class="text-xs text-slate-500 mt-1">ยอดรวม ฿${moneySafe(o.pricing?.total)} • ${new Date(o.updatedAt).toLocaleString('th-TH')}</div>
+              </div>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-semibold shrink-0 ${statusClass(o.status)}">
+              <i data-lucide="${meta.icon}" class="w-3.5 h-3.5"></i>${meta.label}
+            </span>
+          </div>
+        </button>`;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  function openOrdersModal() {
+    const user = requireLogin('ดูคำสั่งซื้อ');
+    if (!user) return;
+    renderOrders('all');
+    openModal('ordersModal');
+  }
+
+  function statusStepHtml(order, statusKey, label, note='') {
+    const statuses = ['pending_seller','awaiting_payment','paid','shipped','completed'];
+    const currentIdx = statuses.indexOf(order.status);
+    const idx = statuses.indexOf(statusKey);
+    const done = order.status === 'cancelled' ? false : idx <= currentIdx;
+    return `
+      <div class="status-step flex items-start gap-3">
+        <div class="w-7 h-7 rounded-full ${done ? 'bg-farm-600 text-white' : 'bg-slate-100 text-slate-400'} grid place-items-center shrink-0">
+          <i data-lucide="${done ? 'check' : 'circle'}" class="w-3.5 h-3.5"></i>
+        </div>
+        <div class="pb-4">
+          <div class="text-sm font-semibold ${done ? 'text-slate-800' : 'text-slate-400'}">${label}</div>
+          ${note ? `<div class="text-[11px] text-slate-400 mt-0.5">${note}</div>`:''}
+        </div>
+      </div>`;
+  }
+
+  function actionButton(order, user) {
+    const isBuyer = order.buyerId === user.id;
+    const isSeller = order.sellerId === user.id;
+    const buttons = [];
+
+    if (order.status === 'pending_seller' && isSeller) {
+      buttons.push(`<button onclick="advanceOrderStatus('${escapeHtml(order.id)}','awaiting_payment')" class="px-4 h-10 rounded-xl bg-farm-600 text-white text-sm font-semibold">ยืนยันคำสั่งซื้อ</button>`);
+    }
+    if (order.status === 'awaiting_payment' && isBuyer) {
+      buttons.push(`<button onclick="advanceOrderStatus('${escapeHtml(order.id)}','paid')" class="px-4 h-10 rounded-xl bg-farm-600 text-white text-sm font-semibold">ยืนยันชำระเงิน</button>`);
+    }
+    if (order.status === 'paid' && isSeller) {
+      buttons.push(`<button onclick="advanceOrderStatus('${escapeHtml(order.id)}','shipped')" class="px-4 h-10 rounded-xl bg-indigo-600 text-white text-sm font-semibold">ทำเครื่องหมายว่าจัดส่งแล้ว</button>`);
+    }
+    if (order.status === 'shipped' && isBuyer) {
+      buttons.push(`<button onclick="advanceOrderStatus('${escapeHtml(order.id)}','completed')" class="px-4 h-10 rounded-xl bg-farm-600 text-white text-sm font-semibold">ยืนยันรับสินค้า</button>`);
+    }
+    if (order.status !== 'completed' && order.status !== 'cancelled' && (isBuyer || isSeller || user.role === 'admin')) {
+      buttons.push(`<button onclick="cancelOrder('${escapeHtml(order.id)}')" class="px-4 h-10 rounded-xl border border-rose-200 text-rose-600 text-sm font-semibold">ยกเลิก</button>`);
+    }
+    if (order.status === 'completed' && isBuyer && !getReviews().some(r => r.orderId === order.id)) {
+      buttons.push(`<button onclick="openReviewModal('${escapeHtml(order.id)}')" class="px-4 h-10 rounded-xl bg-amber-500 text-white text-sm font-semibold">รีวิวการซื้อขาย</button>`);
+    }
+    return buttons.join('');
+  }
+
+  function openOrderDetail(orderId) {
+    const user = requireLogin('ดูรายละเอียดคำสั่งซื้อ');
+    if (!user) return;
+    const order = getOrders().find(o => o.id === orderId);
+    if (!order || !orderVisibleToUser(order, user)) return showToast('ไม่พบคำสั่งซื้อนี้');
+    const meta = ORDER_STATUS[order.status] || ORDER_STATUS.pending_seller;
+    const statuses = [
+      ['pending_seller','ส่งคำขอซื้อ','คำสั่งซื้อถูกสร้างและส่งให้ผู้ขาย'],
+      ['awaiting_payment','ผู้ขายยืนยัน','เข้าสู่ขั้นตอนชำระเงิน'],
+      ['paid','ชำระเงินแล้ว','ระบบรอการเตรียมและจัดส่ง'],
+      ['shipped','กำลังจัดส่ง','ผู้ขายแจ้งว่าสินค้าออกจากต้นทางแล้ว'],
+      ['completed','ปิดการขาย','ผู้ซื้อยืนยันรับสินค้าแล้ว']
+    ];
+    document.getElementById('orderDetailContent').innerHTML = `
+      <div class="pr-10">
+        <span class="text-xs text-farm-600 font-semibold">ORDER ${escapeHtml(order.id)}</span>
+        <h2 class="text-2xl font-bold mt-1">${escapeHtml(order.productTitle)}</h2>
+        <div class="flex flex-wrap items-center gap-2 mt-2">
+          <span class="inline-flex px-2.5 py-1 rounded-full border text-xs font-semibold ${statusClass(order.status)}">${meta.label}</span>
+          <span class="text-xs text-slate-400">อัปเดต ${new Date(order.updatedAt).toLocaleString('th-TH')}</span>
+        </div>
+      </div>
+      <div class="mt-6 grid md:grid-cols-[1fr_1.1fr] gap-5">
+        <div>
+          <img src="${escapeHtml(order.productImage)}" class="w-full h-56 object-cover rounded-2xl bg-slate-100">
+          <div class="mt-4 rounded-2xl border border-slate-200 p-4">
+            <div class="font-semibold">ข้อมูลคู่ค้า</div>
+            <div class="text-sm mt-3">ผู้ซื้อ: <b>${escapeHtml(order.buyerName)}</b></div>
+            <div class="text-sm mt-1">ผู้ขาย: <b>${escapeHtml(order.sellerName)}</b></div>
+            <div class="text-sm mt-1">ต้นทาง: ${escapeHtml(order.productProvince || '-')}</div>
+            <div class="text-sm mt-1">ปลายทาง: ${escapeHtml(order.buyerProvince || '-')}</div>
+            <div class="text-sm mt-1">วิธีรับสินค้า: ${order.delivery === 'pickup' ? 'นัดรับ / รับเอง' : 'จัดส่งถึงที่'}</div>
+          </div>
+          <div class="mt-4 rounded-2xl bg-green-50 border border-green-100 p-4 text-xs text-green-800">
+            <div class="font-semibold">การชำระเงินแบบพักเงินกลาง (Demo)</div>
+            ระบบต้นแบบจะถือสถานะชำระเงินไว้จนกว่าผู้ซื้อจะยืนยันรับสินค้า
+          </div>
+        </div>
+        <div>
+          <div class="rounded-2xl border border-slate-200 p-5">
+            <div class="font-semibold">Timeline การทำธุรกรรม</div>
+            <div class="status-track mt-5">
+              ${statuses.map(([key,label,note]) => statusStepHtml(order,key,label,note)).join('')}
+              ${order.status === 'cancelled' ? `<div class="status-step flex items-start gap-3"><div class="w-7 h-7 rounded-full bg-rose-600 text-white grid place-items-center shrink-0"><i data-lucide="x" class="w-4 h-4"></i></div><div><div class="text-sm font-semibold text-rose-700">คำสั่งซื้อถูกยกเลิก</div><div class="text-[11px] text-slate-400 mt-0.5">ธุรกรรมสิ้นสุด</div></div></div>`:''}
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 p-5 mt-4">
+            <div class="font-semibold">สรุปค่าใช้จ่าย</div>
+            <div class="flex justify-between text-sm mt-3"><span class="text-slate-500">ราคาสินค้า</span><b>฿${moneySafe(order.pricing?.itemPrice)}</b></div>
+            <div class="flex justify-between text-sm mt-2"><span class="text-slate-500">ค่าขนส่ง</span><b>฿${moneySafe(order.pricing?.shipping)}</b></div>
+            <div class="flex justify-between text-sm mt-2"><span class="text-slate-500">ค่าบริการแพลตฟอร์ม</span><b>฿${moneySafe(order.pricing?.platformFee)}</b></div>
+            <div class="flex justify-between text-sm mt-2"><span class="text-slate-500">ค่าพักเงินกลาง</span><b>฿${moneySafe(order.pricing?.escrowFee)}</b></div>
+            <div class="border-t border-slate-200 mt-3 pt-3 flex justify-between"><span class="font-semibold">ยอดรวม</span><span class="text-xl font-bold text-farm-700">฿${moneySafe(order.pricing?.total)}</span></div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mt-4">${actionButton(order,user)}</div>
+          ${order.note ? `<div class="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">หมายเหตุจากผู้ซื้อ: ${escapeHtml(order.note)}</div>`:''}
+        </div>
+      </div>`;
+    lucide.createIcons();
+    closeModal('ordersModal');
+    openModal('orderDetailModal');
+  }
+
+  function updateOrderAndNotify(order, nextStatus, actor) {
+    const meta = ORDER_STATUS[nextStatus] || ORDER_STATUS.pending_seller;
+    const now = new Date().toISOString();
+    order.status = nextStatus;
+    order.updatedAt = now;
+    order.history = Array.isArray(order.history) ? order.history : [];
+    order.history.push({status:nextStatus, at:now, by:actor.id});
+    const otherUserId = actor.id === order.buyerId ? order.sellerId : order.buyerId;
+    if (otherUserId) addNotification(`สถานะคำสั่งซื้อเปลี่ยนเป็น "${meta.label}"`, `${order.id} • ${order.productTitle}`, 'order', otherUserId, 'order', order.id);
+    addNotification(`อัปเดตคำสั่งซื้อสำเร็จ`, `${order.id} อยู่ในสถานะ ${meta.label}`, 'success', actor.id, 'order', order.id);
+  }
+
+  function advanceOrderStatus(orderId, nextStatus) {
+    const user = requireLogin('อัปเดตสถานะคำสั่งซื้อ');
+    if (!user) return;
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const allowed = (
+      (nextStatus === 'awaiting_payment' && order.status === 'pending_seller' && (order.sellerId === user.id || user.role === 'admin')) ||
+      (nextStatus === 'paid' && order.status === 'awaiting_payment' && order.buyerId === user.id) ||
+      (nextStatus === 'shipped' && order.status === 'paid' && (order.sellerId === user.id || user.role === 'admin')) ||
+      (nextStatus === 'completed' && order.status === 'shipped' && order.buyerId === user.id)
+    );
+    if (!allowed) {
+      showToast('คุณไม่มีสิทธิ์เปลี่ยนสถานะนี้ในขั้นตอนปัจจุบัน');
+      return;
+    }
+
+    updateOrderAndNotify(order,nextStatus,user);
+    saveOrders(orders);
+
+    if (nextStatus === 'completed' && order.sellerId) {
+      addNotification('ผู้ซื้อยืนยันรับสินค้าแล้ว', `${order.id} ปิดการขายสำเร็จ`, 'success', order.sellerId, 'order', order.id);
+    }
+
+    openOrderDetail(orderId);
+    updateNotificationBadges();
+    renderOrders('all');
+  }
+
+  function cancelOrder(orderId) {
+    const user = requireLogin('ยกเลิกคำสั่งซื้อ');
+    if (!user) return;
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    if (['completed','cancelled'].includes(order.status)) return;
+    if (!(order.buyerId === user.id || order.sellerId === user.id || user.role === 'admin')) return;
+    if (!confirm(`ยืนยันยกเลิก ${order.id} ใช่หรือไม่?`)) return;
+    updateOrderAndNotify(order,'cancelled',user);
+    saveOrders(orders);
+    showToast('ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว');
+    openOrderDetail(orderId);
+    updateNotificationBadges();
+  }
+
+  function openNotificationCenter() {
+    const user = requireLogin('ดูการแจ้งเตือน');
+    if (!user) return;
+    renderNotifications();
+    openModal('notificationsModal');
+  }
+
+  function renderNotifications() {
+    const user = currentUser();
+    if (!user) return;
+    const list = getNotifications().filter(n => !n.userId || n.userId === user.id).sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+    const box = document.getElementById('notificationList');
+    if (!box) return;
+
+    if (!list.length) {
+      box.innerHTML = `<div class="py-14 text-center border border-dashed border-slate-200 rounded-2xl text-sm text-slate-500">ยังไม่มีการแจ้งเตือน</div>`;
+      return;
+    }
+
+    box.innerHTML = list.map(n => `
+      <button onclick="markNotificationRead('${escapeHtml(n.id)}','${escapeHtml(n.linkType || 'system')}','${escapeHtml(n.linkId || '')}')" class="w-full text-left p-4 rounded-2xl border ${n.read ? 'border-slate-200 bg-white' : 'border-amber-200 bg-amber-50/60'} hover:bg-slate-50 transition">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl ${n.type === 'order' ? 'bg-blue-50 text-blue-700' : n.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} grid place-items-center shrink-0"><i data-lucide="${n.type === 'order' ? 'shopping-bag' : n.type === 'success' ? 'check-circle-2' : 'bell'}" class="w-4 h-4"></i></div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-3"><div class="font-semibold text-sm">${escapeHtml(n.title)}</div>${n.read ? '' : '<span class="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>'}</div>
+            <div class="text-xs text-slate-500 mt-1">${escapeHtml(n.message)}</div>
+            <div class="text-[10px] text-slate-400 mt-2">${new Date(n.createdAt).toLocaleString('th-TH')}</div>
+          </div>
+        </div>
+      </button>`).join('');
+    lucide.createIcons();
+  }
+
+  function markNotificationRead(id, linkType='system', linkId='') {
+    const items = getNotifications();
+    const idx = items.findIndex(n => n.id === id);
+    if (idx >= 0) items[idx].read = true;
+    saveNotifications(items);
+    renderNotifications();
+    if (linkType === 'order' && linkId) openOrderDetail(linkId);
+  }
+
+  function markAllNotificationsRead() {
+    const user = currentUser();
+    if (!user) return;
+    const items = getNotifications();
+    items.forEach(n => {
+      if (!n.userId || n.userId === user.id) n.read = true;
+    });
+    saveNotifications(items);
+    renderNotifications();
+    showToast('ทำเครื่องหมายว่าอ่านแล้วทั้งหมด');
+  }
+
+  function openProfileModal() {
+    const user = requireLogin('จัดการโปรไฟล์');
+    if (!user) return;
+    const profile = getProfiles()[user.id] || {};
+    document.getElementById('profileName').value = user.name || '';
+    document.getElementById('profileEmail').value = user.email || '';
+    document.getElementById('profilePhone').value = user.phone || '';
+    document.getElementById('profileAddress').value = profile.address || '';
+    document.getElementById('profileProvince').value = profile.province || PROVINCES[0] || '';
+    document.getElementById('profileDistrict').value = profile.district || '';
+    document.getElementById('profileSubdistrict').value = profile.subdistrict || '';
+    document.getElementById('profileZip').value = profile.zip || '';
+    openModal('profileModal');
+  }
+
+  function saveProfile(event) {
+    event.preventDefault();
+    const user = currentUser();
+    if (!user) return;
+    const profiles = getProfiles();
+    profiles[user.id] = {
+      address:document.getElementById('profileAddress').value.trim(),
+      province:document.getElementById('profileProvince').value,
+      district:document.getElementById('profileDistrict').value.trim(),
+      subdistrict:document.getElementById('profileSubdistrict').value.trim(),
+      zip:document.getElementById('profileZip').value.trim(),
+      updatedAt:new Date().toISOString()
+    };
+    saveProfiles(profiles);
+    closeModal('profileModal');
+    showToast('บันทึกข้อมูลโปรไฟล์และที่อยู่แล้ว');
+  }
+
+  function openUserDashboard() {
+    const user = requireLogin('เปิด Dashboard');
+    if (!user) return;
+    const orders = getOrders().filter(o => orderVisibleToUser(o,user));
+    const listings = typeof getUserListings === 'function' ? getUserListings().filter(x => x.ownerId === user.id) : [];
+    const buyerOrders = orders.filter(o => o.buyerId === user.id);
+    const sellerOrders = orders.filter(o => o.sellerId === user.id);
+    const completedSeller = sellerOrders.filter(o => o.status === 'completed');
+    const completedBuyer = buyerOrders.filter(o => o.status === 'completed');
+    const revenue = completedSeller.reduce((sum,o) => sum + Number(o.pricing?.sellerNet || 0),0);
+    const spent = completedBuyer.reduce((sum,o) => sum + Number(o.pricing?.total || 0),0);
+    const unread = getNotifications().filter(n => !n.read && (!n.userId || n.userId === user.id)).length;
+
+    document.getElementById('dashboardWelcome').textContent = `${user.name} • ${typeof roleLabel === 'function' ? roleLabel(user.role) : user.role}`;
+    document.getElementById('dashboardStats').innerHTML = `
+      <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs text-slate-400">ประกาศของฉัน</div><div class="text-2xl font-bold mt-1">${listings.length}</div></div>
+      <div class="rounded-2xl bg-blue-50 p-4"><div class="text-xs text-blue-600">คำสั่งซื้อของฉัน</div><div class="text-2xl font-bold text-blue-700 mt-1">${orders.length}</div></div>
+      <div class="rounded-2xl bg-green-50 p-4"><div class="text-xs text-green-600">รายได้จากการขาย</div><div class="text-2xl font-bold text-green-700 mt-1">฿${moneySafe(revenue)}</div></div>
+      <div class="rounded-2xl bg-amber-50 p-4"><div class="text-xs text-amber-600">ยอดซื้อสำเร็จ</div><div class="text-2xl font-bold text-amber-700 mt-1">฿${moneySafe(spent)}</div></div>`;
+
+    const months = [];
+    const now = new Date();
+    for (let i=5;i>=0;i--) {
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const label = d.toLocaleDateString('th-TH',{month:'short'});
+      const total = completedSeller.filter(o => {
+        const od = new Date(o.updatedAt);
+        return od.getFullYear() === d.getFullYear() && od.getMonth() === d.getMonth();
+      }).reduce((s,o)=>s+Number(o.pricing?.sellerNet||0),0);
+      months.push({label,total});
+    }
+    const max = Math.max(1,...months.map(x=>x.total));
+    document.getElementById('dashboardChart').innerHTML = months.map(m=>`
+      <div class="flex items-center gap-3">
+        <div class="w-12 text-xs text-slate-500">${escapeHtml(m.label)}</div>
+        <div class="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden"><div class="mini-bar h-full rounded-full bg-farm-500" style="width:${Math.max(4,(m.total/max)*100)}%"></div></div>
+        <div class="w-24 text-right text-xs font-semibold">฿${moneySafe(m.total)}</div>
+      </div>`).join('');
+
+    const statuses = Object.keys(ORDER_STATUS).map(key => ({
+      key,label:ORDER_STATUS[key].label,count:orders.filter(o=>o.status===key).length
+    })).filter(x=>x.count>0);
+    document.getElementById('dashboardStatusSummary').innerHTML = statuses.length ? statuses.map(s=>`
+      <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+        <span class="text-sm">${escapeHtml(s.label)}</span><span class="font-bold">${s.count}</span>
+      </div>`).join('') : `<div class="py-8 text-center text-sm text-slate-500">ยังไม่มีธุรกรรม</div>`;
+
+    const recent = [...orders].sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,5);
+    document.getElementById('dashboardRecent').innerHTML = recent.length ? recent.map(o=>`
+      <button onclick="openOrderDetail('${escapeHtml(o.id)}')" class="w-full flex items-center justify-between gap-3 text-left rounded-xl border border-slate-200 p-3 hover:bg-slate-50">
+        <div class="min-w-0"><div class="text-xs text-slate-400">${escapeHtml(o.id)}</div><div class="font-medium text-sm truncate">${escapeHtml(o.productTitle)}</div></div>
+        <span class="px-2 py-1 rounded-full border text-[10px] font-semibold ${statusClass(o.status)}">${escapeHtml(ORDER_STATUS[o.status]?.label||o.status)}</span>
+      </button>`).join('') : `<div class="py-8 text-center text-sm text-slate-500">ยังไม่มีธุรกรรมล่าสุด</div>`;
+
+    const verified = user.verified || user.role === 'admin';
+    document.getElementById('dashboardVerification').innerHTML = `
+      <div class="rounded-2xl ${verified ? 'bg-green-50 border-green-100' : 'bg-amber-50 border-amber-100'} border p-4">
+        <div class="flex items-center gap-2 font-semibold ${verified ? 'text-green-800':'text-amber-800'}"><i data-lucide="${verified ? 'badge-check':'shield-alert'}" class="w-5 h-5"></i>${verified ? 'บัญชีผ่านการยืนยัน' : 'บัญชียังไม่ผ่านการยืนยันผู้ขาย'}</div>
+        <div class="text-xs text-slate-500 mt-2">${verified ? 'บัญชีสามารถใช้งานโมดูลซื้อขายได้ตามบทบาท' : 'ผู้ขายควรได้รับการตรวจสอบโดยผู้ดูแลก่อนแสดงสถานะยืนยันบนประกาศ'}</div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button onclick="openProfileModal()" class="h-10 rounded-xl border border-slate-200 text-xs font-semibold">แก้ไขที่อยู่</button>
+        <button onclick="openNotificationCenter()" class="h-10 rounded-xl border border-slate-200 text-xs font-semibold">แจ้งเตือน (${unread})</button>
+      </div>`;
+
+    openModal('userDashboardModal');
+    lucide.createIcons();
+  }
+
+  function openReviewModal(orderId) {
+    const user = requireLogin('เขียนรีวิว');
+    if (!user) return;
+    const order = getOrders().find(o => o.id === orderId && o.buyerId === user.id && o.status === 'completed');
+    if (!order) return showToast('ยังไม่สามารถรีวิวคำสั่งซื้อนี้ได้');
+    if (getReviews().some(r => r.orderId === orderId)) return showToast('คุณรีวิวคำสั่งซื้อนี้แล้ว');
+    document.getElementById('reviewOrderId').value = orderId;
+    document.getElementById('reviewProductTitle').textContent = `${order.productTitle} • ผู้ขาย ${order.sellerName}`;
+    document.getElementById('reviewRating').value = '5';
+    document.getElementById('reviewText').value = '';
+    openModal('reviewModal');
+  }
+
+  function submitReview(event) {
+    event.preventDefault();
+    const user = currentUser();
+    if (!user) return;
+    const orderId = document.getElementById('reviewOrderId').value;
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId && o.buyerId === user.id && o.status === 'completed');
+    if (!order) return;
+    const reviews = getReviews();
+    if (reviews.some(r => r.orderId === orderId)) return showToast('รีวิวนี้ถูกบันทึกไปแล้ว');
+    const review = {
+      id:crypto.randomUUID ? crypto.randomUUID() : `r_${Date.now()}`,
+      orderId,
+      reviewerId:user.id,
+      sellerId:order.sellerId,
+      rating:Number(document.getElementById('reviewRating').value),
+      text:document.getElementById('reviewText').value.trim(),
+      createdAt:new Date().toISOString()
+    };
+    reviews.push(review);
+    saveReviews(reviews);
+
+    const users = typeof getUsers === 'function' ? getUsers() : [];
+    const seller = users.find(u => u.id === order.sellerId);
+    if (seller) {
+      const sellerReviews = reviews.filter(r => r.sellerId === seller.id);
+      seller.reviewCount = sellerReviews.length;
+      seller.rating = Number((sellerReviews.reduce((s,r)=>s+r.rating,0)/sellerReviews.length).toFixed(1));
+      saveUsers(users);
+    }
+
+    closeModal('reviewModal');
+    addNotification('บันทึกรีวิวสำเร็จ', `ขอบคุณสำหรับรีวิว ${order.productTitle}`, 'success', user.id, 'order', order.id);
+    showToast('บันทึกรีวิวเรียบร้อยแล้ว');
+    updateAuthUI();
+  }
+
+  function openAdminDashboard() {
+    const user = currentUser();
+    if (!user || user.role !== 'admin') {
+      showToast('เมนูนี้สำหรับผู้ดูแลระบบเท่านั้น');
+      return;
+    }
+    const users = typeof getUsers === 'function' ? getUsers() : [];
+    const allListings = typeof getUserListings === 'function' ? getUserListings() : [];
+    const orders = getOrders();
+    const reports = getReports();
+    const totalRevenue = orders.filter(o=>o.status==='completed').reduce((s,o)=>s+Number(o.pricing?.itemPrice||0),0);
+    const pendingReports = reports.filter(r=>r.status !== 'resolved').length;
+    const pendingOrders = orders.filter(o=>!['completed','cancelled'].includes(o.status)).length;
+    const sellers = users.filter(u=>['seller','shop'].includes(u.role));
+    const verifiedSellers = sellers.filter(u=>u.verified).length;
+
+    document.getElementById('adminStats').innerHTML = [
+      ['ผู้ใช้',users.length,'bg-slate-50 text-slate-500'],
+      ['ประกาศ',allListings.length,'bg-blue-50 text-blue-600'],
+      ['ธุรกรรม',orders.length,'bg-indigo-50 text-indigo-600'],
+      ['กำลังดำเนินการ',pendingOrders,'bg-amber-50 text-amber-600'],
+      ['รายงานค้าง',pendingReports,'bg-rose-50 text-rose-600'],
+      ['ยอดขายสำเร็จ',`฿${moneySafe(totalRevenue)}`,'bg-green-50 text-green-600']
+    ].map(([label,value,c])=>`<div class="rounded-2xl ${c.split(' ')[0]} p-4"><div class="text-xs ${c.split(' ')[1]}">${label}</div><div class="text-xl font-bold mt-1">${value}</div></div>`).join('');
+
+    document.getElementById('adminUsers').innerHTML = users.slice(-8).reverse().map(u => `
+      <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+        <div class="min-w-0"><div class="font-medium text-sm truncate">${escapeHtml(u.name)}</div><div class="text-[11px] text-slate-400">${escapeHtml(u.email)} • ${escapeHtml(typeof roleLabel==='function'?roleLabel(u.role):u.role)}</div></div>
+        <button onclick="toggleSellerVerification('${escapeHtml(u.id)}')" class="px-2.5 h-8 rounded-lg ${u.verified ? 'bg-green-50 text-green-700':'bg-slate-100 text-slate-600'} text-[10px] font-semibold">${u.verified ? 'ยืนยันแล้ว':'ยืนยันผู้ขาย'}</button>
+      </div>`).join('') || `<div class="text-sm text-slate-500">ยังไม่มีข้อมูลผู้ใช้</div>`;
+    document.getElementById('adminReports').innerHTML = reports.length ? reports.slice(-8).reverse().map(r => `
+      <div class="rounded-xl border border-slate-200 p-3">
+        <div class="flex items-center justify-between gap-3"><div class="font-medium text-sm">${escapeHtml(r.reason)}</div><span class="text-[10px] px-2 py-1 rounded-full ${r.status==='resolved'?'bg-green-50 text-green-700':'bg-rose-50 text-rose-700'}">${r.status==='resolved'?'แก้ไขแล้ว':'รอตรวจสอบ'}</span></div>
+        <div class="text-xs text-slate-500 mt-1">${escapeHtml(r.productTitle || '')}</div>
+        <div class="flex gap-2 mt-2"><button onclick="resolveReport('${escapeHtml(r.id)}')" class="text-xs text-farm-700 font-semibold">ปิดเรื่อง</button>${r.productId ? `<button onclick="openDetail(${Number(r.productId)}); closeModal('adminDashboardModal')" class="text-xs text-slate-600 font-semibold">ดูประกาศ</button>`:''}</div>
+      </div>`).join('') : `<div class="text-sm text-slate-500">ยังไม่มีรายงาน</div>`;
+
+    document.getElementById('adminOrders').innerHTML = orders.slice(-8).reverse().map(o=>`
+      <button onclick="openOrderDetail('${escapeHtml(o.id)}')" class="w-full text-left flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3 hover:bg-slate-50">
+        <div class="min-w-0"><div class="font-medium text-sm truncate">${escapeHtml(o.productTitle)}</div><div class="text-[11px] text-slate-400">${escapeHtml(o.id)} • ${escapeHtml(o.sellerName)}</div></div>
+        <span class="text-[10px] font-semibold ${statusClass(o.status)} px-2 py-1 rounded-full border">${escapeHtml(ORDER_STATUS[o.status]?.label||o.status)}</span>
+      </button>`).join('') || `<div class="text-sm text-slate-500">ยังไม่มีธุรกรรม</div>`;
+
+    openModal('adminDashboardModal');
+    lucide.createIcons();
+    showToast(`ผู้ขายยืนยันแล้ว ${verifiedSellers} ราย`);
+  }
+
+  function toggleSellerVerification(userId) {
+    const admin = currentUser();
+    if (!admin || admin.role !== 'admin') return;
+    const users = getUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    user.verified = !user.verified;
+    saveUsers(users);
+    if (user.verified) addNotification('ยืนยันบัญชีผู้ขายสำเร็จ', 'บัญชีของคุณได้รับการยืนยันจากผู้ดูแลระบบ', 'success', user.id);
+    openAdminDashboard();
+    showToast(user.verified ? 'ยืนยันผู้ขายแล้ว' : 'ยกเลิกสถานะยืนยันแล้ว');
+  }
+
+  function resolveReport(reportId) {
+    const admin = currentUser();
+    if (!admin || admin.role !== 'admin') return;
+    const reports = getReports();
+    const report = reports.find(r=>r.id===reportId);
+    if (!report) return;
+    report.status='resolved';
+    report.resolvedAt=new Date().toISOString();
+    report.resolvedBy=admin.id;
+    saveReports(reports);
+    addNotification('รายงานได้รับการตรวจสอบแล้ว', `รายการ ${report.productTitle || report.productId || ''}`, 'success', report.reporterId || null);
+    openAdminDashboard();
+  }
+
+  function wrapExistingFunctions() {
+    // ขยาย roleLabel ให้รองรับ Admin โดยไม่แตะโค้ดเดิม
+    if (typeof window.roleLabel === 'function') {
+      const originalRoleLabel = window.roleLabel;
+      window.roleLabel = function(role) {
+        if (role === 'admin') return 'ผู้ดูแลระบบ';
+        return originalRoleLabel(role);
+      };
+    }
+
+    // บันทึก profile เริ่มต้นให้ผู้ใช้ใหม่
+    if (typeof window.registerUser === 'function' && !window.registerUser.__enhanced) {
+      const originalRegister = window.registerUser;
+      const wrappedRegister = async function(event) {
+        await originalRegister(event);
+        const user = currentUser();
+        if (user) {
+          const profiles = getProfiles();
+          if (!profiles[user.id]) {
+            profiles[user.id] = { province:PROVINCES[0] || '', district:'', subdistrict:'', address:'', zip:'', updatedAt:new Date().toISOString() };
+            saveProfiles(profiles);
+          }
+          addNotification('ยินดีต้อนรับสู่ AgriMarket', `คุณสามารถเปิดศูนย์ระบบเพื่อจัดการ Dashboard และคำสั่งซื้อ`, 'success', user.id);
+        }
+        updateSystemRoleUI();
+      };
+      wrappedRegister.__enhanced = true;
+      window.registerUser = wrappedRegister;
+    }
+
+    // ขยาย submitListing เพื่อสร้างการแจ้งเตือนเมื่อมีประกาศใหม่
+    if (typeof window.submitListing === 'function' && !window.submitListing.__enhanced) {
+      const originalSubmitListing = window.submitListing;
+      const wrappedSubmitListing = async function(event, forcedStatus=null) {
+        const before = getUserListings().map(x => String(x.id));
+        await originalSubmitListing(event, forcedStatus);
+        const after = getUserListings();
+        const newItems = after.filter(x => !before.includes(String(x.id)) && x.status !== 'draft');
+        newItems.forEach(checkSavedSearchAlerts);
+        updateNotificationBadges();
+      };
+      wrappedSubmitListing.__enhanced = true;
+      window.submitListing = wrappedSubmitListing;
+    }
+
+    // ขยาย submitReport ให้เก็บข้อมูลลงระบบรายงานของ Admin
+    if (typeof window.submitReport === 'function' && !window.submitReport.__enhanced) {
+      const originalSubmitReport = window.submitReport;
+      const wrappedSubmitReport = function(event) {
+        const form = event.target;
+        const modal = document.getElementById('reportModal');
+        const productId = Number(modal?.dataset.productId || 0);
+        const product = getProductList().find(p => p.id === productId);
+        const data = new FormData(form);
+        const reports = getReports();
+        reports.push({
+          id:crypto.randomUUID ? crypto.randomUUID() : `rep_${Date.now()}`,
+          productId:productId || null,
+          productTitle:product?.title || '',
+          reporterId:currentUserId(),
+          reason:String(data.get('reason') || ''),
+          detail:String(data.get('detail') || ''),
+          status:'pending',
+          createdAt:new Date().toISOString()
+        });
+        saveReports(reports);
+        if (currentUserId()) addNotification('ส่งรายงานแล้ว', `ทีมงานจะตรวจสอบ ${product?.title || 'รายการนี้'}`, 'info', currentUserId());
+        originalSubmitReport(event);
+      };
+      wrappedSubmitReport.__enhanced = true;
+      window.submitReport = wrappedSubmitReport;
+    }
+
+    // เปลี่ยนการแจ้งเตือนเดิมให้เปิด Notification Center
+    const notificationButton = document.querySelector('header button[title^="การแจ้งเตือน"]');
+    if (notificationButton && !notificationButton.__enhanced) {
+      notificationButton.__enhanced = true;
+      notificationButton.onclick = () => openNotificationCenter();
+    }
+
+    // เพิ่มปุ่ม "สร้างคำสั่งซื้อ" เข้าไปในรายละเอียดสินค้าโดยครอบฟังก์ชันเดิม
+    if (typeof window.openDetail === 'function' && !window.openDetail.__enhanced) {
+      const originalOpenDetail = window.openDetail;
+      const wrappedOpenDetail = function(id) {
+        originalOpenDetail(id);
+        setTimeout(() => {
+          const p = getProductList().find(x => x.id === Number(id));
+          const detail = document.getElementById('detailContent');
+          if (!p || !detail || detail.querySelector('[data-enhanced-buy]')) return;
+          const actionGroup = detail.querySelector('.mt-6.grid.grid-cols-2.gap-3');
+          if (actionGroup) {
+            actionGroup.insertAdjacentHTML('afterend', `
+              <button data-enhanced-buy onclick="openCheckout(${Number(p.id)})" class="mt-3 w-full h-11 rounded-xl bg-farm-700 hover:bg-farm-800 text-white text-sm font-semibold flex items-center justify-center gap-2">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i> สร้างคำสั่งซื้อ / ซื้อสินค้า
+              </button>
+              <div class="mt-2 text-[10px] text-slate-400 text-center">ระบบจะคำนวณยอดสินค้า + ค่าขนส่ง + ค่าธรรมเนียมให้อัตโนมัติ</div>`);
+            lucide.createIcons();
+          }
+        }, 60);
+      };
+      wrappedOpenDetail.__enhanced = true;
+      window.openDetail = wrappedOpenDetail;
+    }
+  }
+
+  function checkSavedSearchAlerts(product) {
+    const searches = getSavedSearchesPersisted();
+    searches.filter(s => !s.userId || s.userId !== product.ownerId).forEach(s => {
+      const text = [product.title,product.brand,product.categoryLabel,product.province,product.desc].join(' ').toLowerCase();
+      const matchQ = !s.q || text.includes(String(s.q).toLowerCase());
+      const matchCategory = !s.category || s.category === 'all' || product.category === s.category;
+      const matchProvince = !s.province || s.province === 'all' || product.province === s.province;
+      const matchPrice = !s.price || s.price === 'all' || product.price <= Number(s.price);
+      const matchBrand = !s.brand || s.brand === 'all' || product.brand === s.brand;
+      const matchLocation = !s.location || s.location === 'all' || product.province === s.location;
+      if (matchQ && matchCategory && matchProvince && matchPrice && matchBrand && matchLocation && s.userId) {
+        addNotification('มีสินค้าใหม่ตรงกับการค้นหาที่บันทึกไว้', `${product.title} • ฿${moneySafe(product.price)} • ${product.province}`, 'info', s.userId);
+      }
+    });
+  }
+
+  function enhanceSavedSearches() {
+    const persisted = getSavedSearchesPersisted();
+    if (persisted.length) {
+      window.savedSearches = persisted;
+    }
+    if (typeof window.saveCurrentSearch === 'function' && !window.saveCurrentSearch.__enhanced) {
+      const originalSaveSearch = window.saveCurrentSearch;
+      const wrappedSaveSearch = function() {
+        const user = currentUser();
+        if (!user) {
+          originalSaveSearch();
+          return;
+        }
+        const item = {
+          q:document.getElementById('heroSearch').value.trim(),
+          category:document.getElementById('heroCategory').value,
+          province:document.getElementById('heroProvince').value,
+          price:document.getElementById('priceFilter').value,
+          condition:document.getElementById('conditionFilter').value,
+          brand:document.getElementById('brandFilter').value,
+          location:document.getElementById('locationFilter').value,
+          savedAt:Date.now(),
+          userId:user.id
+        };
+        const all = getSavedSearchesPersisted();
+        all.push(item);
+        saveSavedSearchesPersisted(all);
+        window.savedSearches = all;
+        const badge = document.getElementById('savedSearchCount');
+        if (badge) {
+          const unread = getNotifications().filter(n=>!n.read && n.userId===user.id).length;
+          badge.textContent = unread || all.filter(x=>x.userId===user.id).length;
+          badge.classList.remove('hidden');
+          badge.classList.add('flex');
+        }
+        showToast('บันทึกการค้นหาแล้ว ระบบจะแจ้งเตือนเมื่อมีสินค้าใหม่ตรงเงื่อนไข');
+      };
+      wrappedSaveSearch.__enhanced = true;
+      window.saveCurrentSearch = wrappedSaveSearch;
+    }
+  }
+
+  async function enhancedInit() {
+    injectEnhancementMarkup();
+    injectSystemHeaderButton();
+    addLoginDemoNote();
+    enhanceSavedSearches();
+    wrapExistingFunctions();
+    await seedDemoAdmin();
+    updateSystemRoleUI();
+    updateNotificationBadges();
+    lucide.createIcons();
+  }
+
+  Object.assign(window, {
+    openSystemHub,
+    openOrdersModal,
+    renderOrders,
+    openOrderDetail,
+    openCheckout,
+    recalculateCheckout,
+    createOrderFromCheckout,
+    advanceOrderStatus,
+    cancelOrder,
+    openNotificationCenter,
+    renderNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    openProfileModal,
+    saveProfile,
+    openUserDashboard,
+    openReviewModal,
+    submitReview,
+    openAdminDashboard,
+    toggleSellerVerification,
+    resolveReport,
+    updateNotificationBadges
+  });
+
+  // ใช้ชื่อแบบเดิมร่วมกับโค้ดต้นฉบับได้ โดยไม่แก้ฟังก์ชันเดิม
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enhancedInit, {once:true});
+  } else {
+    enhancedInit();
+  }
+
+  // ปรับ UI ต่อเมื่อ Login/Logout เกิดขึ้นภายหลัง โดยไม่แก้โค้ดเดิม
+  const originalUpdateAuthUI = window.updateAuthUI;
+  if (typeof originalUpdateAuthUI === 'function' && !originalUpdateAuthUI.__enhancedHook) {
+    const hooked = function() {
+      originalUpdateAuthUI();
+      updateSystemRoleUI();
+      updateNotificationBadges();
+    };
+    hooked.__enhancedHook = true;
+    window.updateAuthUI = hooked;
+  }
+})();
+</script>
 </body>
 </html>
