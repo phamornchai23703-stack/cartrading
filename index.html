@@ -176,16 +176,11 @@
           </select>
           <select id="heroProvince" onchange="applyFilters()" class="h-12 lg:w-48 px-4 rounded-xl bg-slate-50 outline-none text-sm text-slate-700">
             <option value="all">ทุกจังหวัด</option>
-            <option>พิษณุโลก</option>
-            <option>นครสวรรค์</option>
-            <option>กำแพงเพชร</option>
-            <option>เชียงใหม่</option>
-            <option>นครราชสีมา</option>
-            <option>สุพรรณบุรี</option>
             <option>กรุงเทพมหานคร</option>
             <option>กระบี่</option>
             <option>กาญจนบุรี</option>
             <option>กาฬสินธุ์</option>
+            <option>กำแพงเพชร</option>
             <option>ขอนแก่น</option>
             <option>จันทบุรี</option>
             <option>ฉะเชิงเทรา</option>
@@ -199,12 +194,16 @@
             <option>นครนายก</option>
             <option>นครปฐม</option>
             <option>นครพนม</option>
+            <option>นครราชสีมา</option>
+            <option>นครศรีธรรมราช</option>
+            <option>นครสวรรค์</option>
             <option>นนทบุรี</option>
             <option>นราธิวาส</option>
             <option>น่าน</option>
             <option>บึงกาฬ</option>
             <option>บุรีรัมย์</option>
             <option>ปทุมธานี</option>
+            <option>พระนครศรีอยุธยา</option>
             <option>ประจวบคีรีขันธ์</option>
             <option>ปราจีนบุรี</option>
             <option>ปัตตานี</option>
@@ -212,9 +211,7 @@
             <option>พังงา</option>
             <option>พัทลุง</option>
             <option>พิจิตร</option>
-            <option>เพชรบุรี</option>
-            <option>เพชรบูรณ์</option>
-            <option>แพร่</option>
+            <option>พิษณุโลก</option>
             <option>ภูเก็ต</option>
             <option>มหาสารคาม</option>
             <option>มุกดาหาร</option>
@@ -239,9 +236,10 @@
             <option>สระแก้ว</option>
             <option>สระบุรี</option>
             <option>สิงห์บุรี</option>
-            <option>สุโขทัย</option>
+            <option>สุพรรณบุรี</option>
             <option>สุราษฎร์ธานี</option>
             <option>สุรินทร์</option>
+            <option>สุโขทัย</option>
             <option>หนองคาย</option>
             <option>หนองบัวลำภู</option>
             <option>อ่างทอง</option>
@@ -250,6 +248,11 @@
             <option>อุตรดิตถ์</option>
             <option>อุทัยธานี</option>
             <option>อุบลราชธานี</option>
+            <option>เชียงราย</option>
+            <option>เชียงใหม่</option>
+            <option>เพชรบุรี</option>
+            <option>เพชรบูรณ์</option>
+            <option>แพร่</option>
           </select>
           <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})" class="h-12 px-7 rounded-xl bg-farm-600 hover:bg-farm-700 text-white font-semibold flex items-center justify-center gap-2 transition">
             <i data-lucide="search" class="w-4 h-4"></i>
@@ -277,7 +280,7 @@
           <div class="text-xs text-slate-400 mt-1">ผู้ขายยืนยันตัวตน</div>
         </div>
         <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
-          <div class="text-2xl font-bold text-white">76 จังหวัด</div>
+          <div class="text-2xl font-bold text-white">77 จังหวัด</div>
           <div class="text-xs text-slate-400 mt-1">ครอบคลุมทั่วไทย</div>
         </div>
         <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
@@ -431,14 +434,83 @@
           <label class="text-xs font-medium text-slate-500">พื้นที่</label>
           <select id="locationFilter" onchange="applyFilters()" class="mt-1 w-full h-10 rounded-xl border border-slate-200 px-3 text-sm">
             <option value="all">ทั่วประเทศ</option>
-            <option>พิษณุโลก</option>
-            <option>นครสวรรค์</option>
-            <option>กำแพงเพชร</option>
-            <option>เชียงใหม่</option>
-            <option>นครราชสีมา</option>
-            <option>สุพรรณบุรี</option>
             <option>กรุงเทพมหานคร</option>
             <option>กระบี่</option>
+            <option>กาญจนบุรี</option>
+            <option>กาฬสินธุ์</option>
+            <option>กำแพงเพชร</option>
+            <option>ขอนแก่น</option>
+            <option>จันทบุรี</option>
+            <option>ฉะเชิงเทรา</option>
+            <option>ชลบุรี</option>
+            <option>ชัยนาท</option>
+            <option>ชัยภูมิ</option>
+            <option>ชุมพร</option>
+            <option>ตรัง</option>
+            <option>ตราด</option>
+            <option>ตาก</option>
+            <option>นครนายก</option>
+            <option>นครปฐม</option>
+            <option>นครพนม</option>
+            <option>นครราชสีมา</option>
+            <option>นครศรีธรรมราช</option>
+            <option>นครสวรรค์</option>
+            <option>นนทบุรี</option>
+            <option>นราธิวาส</option>
+            <option>น่าน</option>
+            <option>บึงกาฬ</option>
+            <option>บุรีรัมย์</option>
+            <option>ปทุมธานี</option>
+            <option>พระนครศรีอยุธยา</option>
+            <option>ประจวบคีรีขันธ์</option>
+            <option>ปราจีนบุรี</option>
+            <option>ปัตตานี</option>
+            <option>พะเยา</option>
+            <option>พังงา</option>
+            <option>พัทลุง</option>
+            <option>พิจิตร</option>
+            <option>พิษณุโลก</option>
+            <option>ภูเก็ต</option>
+            <option>มหาสารคาม</option>
+            <option>มุกดาหาร</option>
+            <option>แม่ฮ่องสอน</option>
+            <option>ยโสธร</option>
+            <option>ยะลา</option>
+            <option>ร้อยเอ็ด</option>
+            <option>ระนอง</option>
+            <option>ระยอง</option>
+            <option>ราชบุรี</option>
+            <option>ลพบุรี</option>
+            <option>ลำปาง</option>
+            <option>ลำพูน</option>
+            <option>เลย</option>
+            <option>ศรีสะเกษ</option>
+            <option>สกลนคร</option>
+            <option>สงขลา</option>
+            <option>สตูล</option>
+            <option>สมุทรปราการ</option>
+            <option>สมุทรสงคราม</option>
+            <option>สมุทรสาคร</option>
+            <option>สระแก้ว</option>
+            <option>สระบุรี</option>
+            <option>สิงห์บุรี</option>
+            <option>สุพรรณบุรี</option>
+            <option>สุราษฎร์ธานี</option>
+            <option>สุรินทร์</option>
+            <option>สุโขทัย</option>
+            <option>หนองคาย</option>
+            <option>หนองบัวลำภู</option>
+            <option>อ่างทอง</option>
+            <option>อำนาจเจริญ</option>
+            <option>อุดรธานี</option>
+            <option>อุตรดิตถ์</option>
+            <option>อุทัยธานี</option>
+            <option>อุบลราชธานี</option>
+            <option>เชียงราย</option>
+            <option>เชียงใหม่</option>
+            <option>เพชรบุรี</option>
+            <option>เพชรบูรณ์</option>
+            <option>แพร่</option>
           </select>
         </div>
       </div>
@@ -704,82 +776,83 @@
             <div>
               <label class="text-sm font-medium">จังหวัด *</label>
               <select required name="province" class="mt-1 w-full h-11 rounded-xl border border-slate-200 px-3">
-                <option>พิษณุโลก</option><option>นครสวรรค์</option><option>กำแพงเพชร</option><option>เชียงใหม่</option><option>นครราชสีมา</option><option>สุพรรณบุรี</option><option>กรุงเทพมหานคร</option>
-<option>กระบี่</option>
-<option>กาญจนบุรี</option>
-<option>กาฬสินธุ์</option>
-<option>กำแพงเพชร</option>
-<option>ขอนแก่น</option>
-<option>จันทบุรี</option>
-<option>ฉะเชิงเทรา</option>
-<option>ชลบุรี</option>
-<option>ชัยนาท</option>
-<option>ชัยภูมิ</option>
-<option>ชุมพร</option>
-<option>ตรัง</option>
-<option>ตราด</option>
-<option>ตาก</option>
-<option>นครนายก</option>
-<option>นครปฐม</option>
-<option>นครพนม</option>
-<option>นครราชสีมา</option>
-<option>นครศรีธรรมราช</option>
-<option>นครสวรรค์</option>
-<option>นนทบุรี</option>
-<option>นราธิวาส</option>
-<option>น่าน</option>
-<option>บึงกาฬ</option>
-<option>บุรีรัมย์</option>
-<option>ปทุมธานี</option>
-<option>ประจวบคีรีขันธ์</option>
-<option>ปราจีนบุรี</option>
-<option>ปัตตานี</option>
-<option>พะเยา</option>
-<option>พังงา</option>
-<option>พัทลุง</option>
-<option>พิจิตร</option>
-<option>พิษณุโลก</option>
-<option>ภูเก็ต</option>
-<option>มหาสารคาม</option>
-<option>มุกดาหาร</option>
-<option>ยะลา</option>
-<option>ยโสธร</option>
-<option>ร้อยเอ็ด</option>
-<option>ระนอง</option>
-<option>ระยอง</option>
-<option>ราชบุรี</option>
-<option>ลพบุรี</option>
-<option>ลำปาง</option>
-<option>ลำพูน</option>
-<option>ศรีสะเกษ</option>
-<option>สกลนคร</option>
-<option>สงขลา</option>
-<option>สตูล</option>
-<option>สมุทรปราการ</option>
-<option>สมุทรสงคราม</option>
-<option>สมุทรสาคร</option>
-<option>สระแก้ว</option>
-<option>สระบุรี</option>
-<option>สิงห์บุรี</option>
-<option>สุพรรณบุรี</option>
-<option>สุราษฎร์ธานี</option>
-<option>สุรินทร์</option>
-<option>สุโขทัย</option>
-<option>หนองคาย</option>
-<option>หนองบัวลำภู</option>
-<option>อ่างทอง</option>
-<option>อำนาจเจริญ</option>
-<option>อุดรธานี</option>
-<option>อุตรดิตถ์</option>
-<option>อุทัยธานี</option>
-<option>อุบลราชธานี</option>
-<option>เชียงราย</option>
-<option>เชียงใหม่</option>
-<option>เพชรบุรี</option>
-<option>เพชรบูรณ์</option>
-<option>เลย</option>
-<option>แพร่</option>
-<option>แม่ฮ่องสอน</option>
+                                <option>กรุงเทพมหานคร</option>
+                <option>กระบี่</option>
+                <option>กาญจนบุรี</option>
+                <option>กาฬสินธุ์</option>
+                <option>กำแพงเพชร</option>
+                <option>ขอนแก่น</option>
+                <option>จันทบุรี</option>
+                <option>ฉะเชิงเทรา</option>
+                <option>ชลบุรี</option>
+                <option>ชัยนาท</option>
+                <option>ชัยภูมิ</option>
+                <option>ชุมพร</option>
+                <option>ตรัง</option>
+                <option>ตราด</option>
+                <option>ตาก</option>
+                <option>นครนายก</option>
+                <option>นครปฐม</option>
+                <option>นครพนม</option>
+                <option>นครราชสีมา</option>
+                <option>นครศรีธรรมราช</option>
+                <option>นครสวรรค์</option>
+                <option>นนทบุรี</option>
+                <option>นราธิวาส</option>
+                <option>น่าน</option>
+                <option>บึงกาฬ</option>
+                <option>บุรีรัมย์</option>
+                <option>ปทุมธานี</option>
+                <option>พระนครศรีอยุธยา</option>
+                <option>ประจวบคีรีขันธ์</option>
+                <option>ปราจีนบุรี</option>
+                <option>ปัตตานี</option>
+                <option>พะเยา</option>
+                <option>พังงา</option>
+                <option>พัทลุง</option>
+                <option>พิจิตร</option>
+                <option>พิษณุโลก</option>
+                <option>ภูเก็ต</option>
+                <option>มหาสารคาม</option>
+                <option>มุกดาหาร</option>
+                <option>แม่ฮ่องสอน</option>
+                <option>ยโสธร</option>
+                <option>ยะลา</option>
+                <option>ร้อยเอ็ด</option>
+                <option>ระนอง</option>
+                <option>ระยอง</option>
+                <option>ราชบุรี</option>
+                <option>ลพบุรี</option>
+                <option>ลำปาง</option>
+                <option>ลำพูน</option>
+                <option>เลย</option>
+                <option>ศรีสะเกษ</option>
+                <option>สกลนคร</option>
+                <option>สงขลา</option>
+                <option>สตูล</option>
+                <option>สมุทรปราการ</option>
+                <option>สมุทรสงคราม</option>
+                <option>สมุทรสาคร</option>
+                <option>สระแก้ว</option>
+                <option>สระบุรี</option>
+                <option>สิงห์บุรี</option>
+                <option>สุพรรณบุรี</option>
+                <option>สุราษฎร์ธานี</option>
+                <option>สุรินทร์</option>
+                <option>สุโขทัย</option>
+                <option>หนองคาย</option>
+                <option>หนองบัวลำภู</option>
+                <option>อ่างทอง</option>
+                <option>อำนาจเจริญ</option>
+                <option>อุดรธานี</option>
+                <option>อุตรดิตถ์</option>
+                <option>อุทัยธานี</option>
+                <option>อุบลราชธานี</option>
+                <option>เชียงราย</option>
+                <option>เชียงใหม่</option>
+                <option>เพชรบุรี</option>
+                <option>เพชรบูรณ์</option>
+                <option>แพร่</option>
               </select>
             </div>
             <div>
@@ -1016,11 +1089,98 @@
       }
     ];
 
-    // Approximate road distance (km) from Bangkok, used only to estimate shipping cost/time between provinces
-    const PROVINCE_DIST_FROM_BKK = {
-      'กรุงเทพฯ':0, 'พิษณุโลก':377, 'นครสวรรค์':240, 'กำแพงเพชร':358,
-      'เชียงใหม่':700, 'นครราชสีมา':259, 'สุพรรณบุรี':107
+    // พิกัดจุดอ้างอิงระดับจังหวัดสำหรับประเมินระยะทางขนส่งครอบคลุม 77 จังหวัด
+    // ใช้ระยะเส้นตรง (Haversine) แล้วปรับเป็นระยะทางถนนโดยประมาณ เพื่อใช้เป็นราคาเบื้องต้น
+    const PROVINCE_COORDS = {
+      'กรุงเทพมหานคร':[13.7278956,100.5241235],
+      'กรุงเทพฯ':[13.7278956,100.5241235],
+      'กระบี่':[8.0862997,98.9062835], 'กาญจนบุรี':[14.0227797,99.5328115],
+      'กาฬสินธุ์':[16.4314078,103.5058755], 'กำแพงเพชร':[16.4827798,99.5226618],
+      'ขอนแก่น':[16.4419355,102.8359921], 'จันทบุรี':[12.61134,102.1038546],
+      'ฉะเชิงเทรา':[13.6904194,101.0779596], 'ชลบุรี':[13.3611431,100.9846717],
+      'ชัยนาท':[15.1851971,100.125125], 'ชัยภูมิ':[15.8068173,102.0315027],
+      'ชุมพร':[10.4930496,99.1800199], 'เชียงราย':[19.9071656,99.830955],
+      'เชียงใหม่':[18.7877477,98.9931311], 'ตรัง':[7.5593851,99.6110065],
+      'ตราด':[12.2427563,102.5174734], 'ตาก':[16.8839901,99.1258498],
+      'นครนายก':[14.2069466,101.2130511], 'นครปฐม':[13.8199206,100.0621676],
+      'นครพนม':[17.392039,104.7695508], 'นครราชสีมา':[14.9798997,102.0977693],
+      'นคราชสีมา':[14.9798997,102.0977693], 'นครศรีธรรมราช':[8.4303975,99.9631219],
+      'นครสวรรค์':[15.6930072,100.1225595], 'นนทบุรี':[13.8621125,100.5143528],
+      'นราธิวาส':[6.4254607,101.8253143], 'น่าน':[18.7756318,100.7730417],
+      'บึงกาฬ':[18.3609104,103.6464463], 'บุรีรัมย์':[14.9930017,103.1029191],
+      'ปทุมธานี':[14.0208391,100.5250276], 'ประจวบคีรีขันธ์':[11.812367,99.7973271],
+      'ปราจีนบุรี':[14.0509704,101.3727439], 'ปัตตานี':[6.8694844,101.2504826],
+      'พระนครศรีอยุธยา':[14.3532128,100.5689599], 'พะเยา':[19.1664789,99.9019419],
+      'พังงา':[8.4407456,98.5193032], 'พัทลุง':[7.6166823,100.0740231],
+      'พิจิตร':[16.4429516,100.3482329], 'พิษณุโลก':[16.8298048,100.2614915],
+      'เพชรบุรี':[13.1111601,99.9391307], 'เพชรบูรณ์':[16.4189807,101.1550926],
+      'แพร่':[18.1445774,100.1402831], 'ภูเก็ต':[7.9810496,98.3638824],
+      'มหาสารคาม':[16.1850896,103.3026461], 'มุกดาหาร':[16.542443,104.7209151],
+      'แม่ฮ่องสอน':[19.2990643,97.9656226], 'ยโสธร':[15.792641,104.1452827],
+      'ยะลา':[6.541147,101.2803947], 'ร้อยเอ็ด':[16.0538196,103.6520036],
+      'ระนอง':[9.9528702,98.6084641], 'ระยอง':[12.6833115,101.2374295],
+      'ราชบุรี':[13.5282893,99.8134211], 'ลพบุรี':[14.7995081,100.6533706],
+      'ลำปาง':[18.2888404,99.490874], 'ลำพูน':[18.5744606,99.0087221],
+      'เลย':[17.4860232,101.7223002], 'ศรีสะเกษ':[15.1186009,104.3220095],
+      'สกลนคร':[17.1545995,104.1348365], 'สงขลา':[7.1756004,100.614347],
+      'สตูล':[6.6238158,100.0673744], 'สมุทรปราการ':[13.5990961,100.5998319],
+      'สมุทรสงคราม':[13.4098217,100.0022645], 'สมุทรสาคร':[13.5475216,100.2743956],
+      'สระแก้ว':[13.824038,102.0645839], 'สระบุรี':[14.5289154,100.9101421],
+      'สิงห์บุรี':[14.8936253,100.3967314], 'สุโขทัย':[17.0055573,99.8263712],
+      'สุพรรณบุรี':[14.4744892,100.1177128], 'สุราษฎร์ธานี':[9.1382389,99.3217483],
+      'สุรินทร์':[14.882905,103.4937107], 'หนองคาย':[17.8782803,102.7412638],
+      'หนองบัวลำภู':[17.2218247,102.4260368], 'อ่างทอง':[14.5896054,100.455052],
+      'อำนาจเจริญ':[15.8656783,104.6257774], 'อุดรธานี':[17.4138413,102.7872325],
+      'อุตรดิตถ์':[17.6200886,100.0992942], 'อุทัยธานี':[15.3835001,100.0245527],
+      'อุบลราชธานี':[15.2286861,104.8564217]
     };
+
+    const PROVINCE_DIST_FROM_BKK = { 'กรุงเทพฯ':0, 'กรุงเทพมหานคร':0 };
+
+    function haversineKm(a,b) {
+      if (!a || !b) return 0;
+      const toRad = deg => deg * Math.PI / 180;
+      const R = 6371;
+      const dLat = toRad(b[0]-a[0]);
+      const dLon = toRad(b[1]-a[1]);
+      const lat1 = toRad(a[0]);
+      const lat2 = toRad(b[0]);
+      const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
+    function getProvinceRoadKm(from, to) {
+      if (!from || !to) return 0;
+      if (from === to) return 25;
+      const fromCoords = PROVINCE_COORDS[from] || PROVINCE_COORDS['กรุงเทพมหานคร'];
+      const toCoords = PROVINCE_COORDS[to] || PROVINCE_COORDS['กรุงเทพมหานคร'];
+      const straightKm = haversineKm(fromCoords, toCoords);
+      // ตัวคูณระยะทางถนนโดยประมาณสำหรับเส้นทางจริงและทางอ้อมของรถบรรทุก
+      return Math.max(30, Math.round(straightKm * 1.25 + 10));
+    }
+
+    function getShippingEstimate(from, to) {
+      const km = getProvinceRoadKm(from, to);
+      const base = 800;
+      const rate = 15;
+      const cost = Math.round(base + km * rate);
+      const days = Math.max(1, Math.ceil(km / 300));
+      return { km, cost, days, base, rate };
+    }
+
+    function populateShippingFromProvince() {
+      const select = document.getElementById('shipFromProvince');
+      const hero = document.getElementById('heroProvince');
+      if (!select || !hero) return;
+      const provinces = Array.from(hero.options)
+        .map(o => o.value || o.textContent)
+        .filter(v => v && v !== 'all' && v !== 'ทุกจังหวัด')
+        .filter((v,i,a) => a.indexOf(v) === i);
+      const current = select.value;
+      select.innerHTML = provinces.map(province => `<option value="${province}">จาก${province}</option>`).join('');
+      if (provinces.includes(current)) select.value = current;
+      else if (provinces.includes('กรุงเทพมหานคร')) select.value = 'กรุงเทพมหานคร';
+    }
 
     const USER_LISTINGS_KEY = 'agrimarket_user_listings_v1';
     const LISTING_IMAGE_MAX = 8;
@@ -1093,6 +1253,7 @@
       const sort = document.getElementById('sortSelect').value;
 
       currentFiltered = products.filter(p => {
+        if (p.status === 'draft') return false;
         const searchable = [p.title,p.brand,p.categoryLabel,p.province,p.seller,p.desc].join(' ').toLowerCase();
         const matchQ = !q || searchable.includes(q);
         const matchCategory = category === 'all' || p.category === category;
@@ -1143,22 +1304,36 @@
       badge.classList.toggle('flex', favorites.size>0);
     }
 
+    function getListingImages(p) {
+      const list = Array.isArray(p?.images) ? p.images.filter(Boolean) : [];
+      if (p?.image && !list.includes(p.image)) list.unshift(p.image);
+      return list.slice(0, LISTING_IMAGE_MAX);
+    }
+
     function card(p) {
       const liked = favorites.has(p.id);
+      const listingImages = getListingImages(p);
+      const mainImage = listingImages[0] || p.image || '';
+      const imageCount = listingImages.length;
       return `
       <article class="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:-translate-y-1 hover:shadow-card transition cursor-pointer" onclick="openDetail(${p.id})">
         <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
-          <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          ${mainImage ? `<img src="${mainImage}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `
+            <div class="w-full h-full grid place-items-center text-slate-400">
+              <i data-lucide="image-off" class="w-10 h-10"></i>
+            </div>`}
           <div class="absolute inset-x-0 top-0 p-3 flex justify-between items-start">
             <div class="flex gap-2">
               <span class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur text-[10px] font-semibold text-slate-700">${p.categoryLabel}</span>
               ${p.score >= 90 ? `<span class="px-2.5 py-1 rounded-full bg-green-600/90 text-white text-[10px] font-semibold">สภาพดีมาก</span>` : ''}
+              ${p.ownerId ? `<span class="px-2.5 py-1 rounded-full bg-farm-600/90 text-white text-[10px] font-semibold">ประกาศใหม่</span>` : ''}
             </div>
             <button onclick="toggleFavorite(${p.id}, event)" class="w-9 h-9 rounded-xl bg-white/90 backdrop-blur grid place-items-center text-slate-500 hover:text-rose-500">
               <i data-lucide="heart" class="w-4 h-4 ${liked ? 'heart-active':''}"></i>
             </button>
           </div>
           ${p.oldPrice ? `<div class="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-rose-500 text-white text-[10px] font-bold">ลดพิเศษ</div>`:''}
+          ${imageCount > 1 ? `<div class="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-slate-950/70 text-white text-[10px] font-semibold backdrop-blur-sm flex items-center gap-1"><i data-lucide="images" class="w-3 h-3"></i>${imageCount} รูป</div>` : ''}
         </div>
         <div class="p-4">
           <div class="flex items-center justify-between gap-2">
@@ -1212,10 +1387,21 @@
 
     function openDetail(id) {
       const p = products.find(x=>x.id===id);
+      const detailImages = getListingImages(p);
+      const detailMainImage = detailImages[0] || p.image || '';
       document.getElementById('detailContent').innerHTML = `
         <div class="grid lg:grid-cols-2">
-          <div class="bg-slate-100">
-            <img src="${p.image}" alt="${p.title}" class="w-full h-full min-h-[360px] max-h-[560px] object-cover">
+          <div class="bg-slate-100 p-4 lg:p-5">
+            <div class="rounded-2xl overflow-hidden bg-white border border-slate-200">
+              ${detailMainImage ? `<img id="detailMainImage" src="${detailMainImage}" alt="${p.title}" class="w-full h-full min-h-[360px] max-h-[560px] object-cover">` : `<div class="min-h-[360px] grid place-items-center text-slate-400"><i data-lucide="image-off" class="w-12 h-12"></i></div>`}
+            </div>
+            ${detailImages.length > 1 ? `
+              <div class="grid grid-cols-4 gap-2 mt-3">
+                ${detailImages.map((src, idx) => `
+                  <button type="button" onclick="showDetailImage(${idx})" class="detail-image-thumb rounded-xl overflow-hidden border ${idx === 0 ? 'border-farm-500 ring-2 ring-green-100' : 'border-slate-200'} bg-white aspect-square">
+                    <img src="${src}" alt="รูปที่ ${idx+1}" class="w-full h-full object-cover">
+                  </button>`).join('')}
+              </div>` : ''}
           </div>
           <div class="p-6 lg:p-8">
             <div class="flex items-center gap-2">
@@ -1280,14 +1466,8 @@
             <div class="mt-6 rounded-2xl border border-slate-200 p-4">
               <div class="font-semibold flex items-center gap-2 text-sm"><i data-lucide="truck" class="w-4 h-4 text-farm-700"></i> ประเมินค่าขนส่ง</div>
               <div class="flex flex-col sm:flex-row gap-2 mt-3">
-                <select id="shipFromProvince" class="h-10 px-3 rounded-xl border border-slate-200 text-sm flex-1">
-                  <option value="กรุงเทพฯ">จากกรุงเทพฯ</option>
-                  <option value="พิษณุโลก">จากพิษณุโลก</option>
-                  <option value="นครสวรรค์">จากนครสวรรค์</option>
-                  <option value="กำแพงเพชร">จากกำแพงเพชร</option>
-                  <option value="เชียงใหม่">จากเชียงใหม่</option>
-                  <option value="นครราชสีมา">จากนครราชสีมา</option>
-                  <option value="สุพรรณบุรี">จากสุพรรณบุรี</option>
+                <select id="shipFromProvince" class="h-10 px-3 rounded-xl border border-slate-200 text-sm flex-1" aria-label="จังหวัดต้นทาง">
+                  <option value="กรุงเทพมหานคร">จากกรุงเทพมหานคร</option>
                 </select>
                 <button onclick="calcShipping(${p.id})" class="h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold">คำนวณ</button>
               </div>
@@ -1311,23 +1491,39 @@
           </div>
         </div>
       `;
+      window.currentDetailImages = detailImages;
+      populateShippingFromProvince();
       openModal('detailModal');
       lucide.createIcons();
     }
 
+    function showDetailImage(index) {
+      const images = Array.isArray(window.currentDetailImages) ? window.currentDetailImages : [];
+      const main = document.getElementById('detailMainImage');
+      if (!main || !images[index]) return;
+      main.src = images[index];
+      document.querySelectorAll('.detail-image-thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('border-farm-500', i === index);
+        thumb.classList.toggle('ring-2', i === index);
+        thumb.classList.toggle('ring-green-100', i === index);
+        thumb.classList.toggle('border-slate-200', i !== index);
+      });
+    }
+
     function calcShipping(id) {
       const p = products.find(x=>x.id===id);
-      const from = document.getElementById('shipFromProvince').value;
-      const distFrom = PROVINCE_DIST_FROM_BKK[from] ?? 0;
-      const distTo = PROVINCE_DIST_FROM_BKK[p.province] ?? 0;
-      const km = from === p.province ? 25 : Math.max(30, Math.abs(distFrom - distTo) + 40);
-      const cost = 800 + km * 15;
-      const days = Math.max(1, Math.ceil(km / 300));
-      document.getElementById('shipResult').innerHTML = `
-        ระยะทางโดยประมาณ <span class="font-semibold text-slate-700">${money(km)} กม.</span> จาก ${from} ถึง ${p.province}
-        &nbsp;•&nbsp; ค่าขนส่งโดยประมาณ <span class="font-semibold text-slate-700">฿${money(cost)}</span>
-        &nbsp;•&nbsp; ใช้เวลาประมาณ <span class="font-semibold text-slate-700">${days} วัน</span>
-        <div class="text-[11px] text-slate-400 mt-1">*ราคาประมาณการสำหรับรถพ่วง/เทรลเลอร์ ขึ้นอยู่กับน้ำหนักและขนาดสินค้าจริง</div>
+      const select = document.getElementById('shipFromProvince');
+      const result = document.getElementById('shipResult');
+      if (!p || !select || !result) return;
+      const from = select.value;
+      const to = p.province || 'กรุงเทพมหานคร';
+      const quote = getShippingEstimate(from, to);
+      result.innerHTML = `
+        <div class="font-medium text-slate-700">${from} → ${to}</div>
+        <div class="mt-1">ระยะทางถนนโดยประมาณ <span class="font-semibold text-slate-700">${money(quote.km)} กม.</span>
+        &nbsp;•&nbsp; ค่าขนส่งโดยประมาณ <span class="font-semibold text-farm-700">฿${money(quote.cost)}</span>
+        &nbsp;•&nbsp; ใช้เวลาประมาณ <span class="font-semibold text-slate-700">${quote.days} วัน</span></div>
+        <div class="text-[11px] text-slate-400 mt-1">*เป็นราคาเพื่อประเมินเบื้องต้นสำหรับรถพ่วง/รถเทรลเลอร์ ครอบคลุมเส้นทางระหว่าง 77 จังหวัด โดยราคาจริงขึ้นอยู่กับน้ำหนัก ขนาด ประเภทรถ จุดรับ–ส่ง และผู้ให้บริการ</div>
       `;
     }
 
@@ -1854,7 +2050,10 @@
         listingImageItems = [];
         renderListingImagePreview();
         applyFilters();
-        showToast(item.status === 'draft' ? `บันทึกแบบร่าง "${title}" แล้ว` : `ลงประกาศ "${title}" สำเร็จแล้ว`);
+        if (item.status !== 'draft') {
+          setTimeout(() => document.getElementById('products')?.scrollIntoView({behavior:'smooth', block:'start'}), 120);
+        }
+        showToast(item.status === 'draft' ? `บันทึกแบบร่าง "${title}" แล้ว` : `ลงประกาศ "${title}" สำเร็จแล้ว รูปภาพแสดงในหน้าการขายแล้ว`);
       } catch (err) {
         console.error(err);
         setListingError('ไม่สามารถประมวลผลรูปภาพได้ กรุณาลองเลือกรูปใหม่อีกครั้ง');
@@ -2455,13 +2654,8 @@
   }
 
   function getShippingQuote(from, to) {
-    const distMap = (typeof PROVINCE_DIST_FROM_BKK !== 'undefined' && PROVINCE_DIST_FROM_BKK) ? PROVINCE_DIST_FROM_BKK : {};
-    const distFrom = distMap[from] ?? 0;
-    const distTo = distMap[to] ?? 0;
-    const km = from === to ? 25 : Math.max(30, Math.abs(distFrom - distTo) + 40);
-    const cost = 800 + km * 15;
-    const days = Math.max(1, Math.ceil(km / 300));
-    return { km, cost, days };
+    if (typeof getShippingEstimate === 'function') return getShippingEstimate(from, to);
+    return { km: 30, cost: 1250, days: 1, base: 800, rate: 15 };
   }
 
   function calculateFinancials(product, buyerProvince, delivery='delivery') {
@@ -3301,5 +3495,313 @@
   }
 })();
 </script>
+
+
+<!-- Enhanced buyer-seller chat system -->
+<style id="agrimarket-chat-enhancement-css">
+  .chat-unread-dot{box-shadow:0 0 0 4px rgba(22,163,74,.10)}
+  .chat-conversation:hover{transform:translateY(-1px)}
+</style>
+
+<!-- Chat Center Modal -->
+<div id="chatCenterModal" class="fixed inset-0 z-[71] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-950/60 modal-backdrop" onclick="closeModal('chatCenterModal')"></div>
+  <div class="relative w-full max-w-3xl max-h-[88vh] overflow-hidden bg-white rounded-3xl shadow-card">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-3">
+      <div>
+        <div class="text-xs font-semibold text-farm-600 uppercase tracking-wider">Messaging</div>
+        <h2 class="text-2xl font-bold mt-1">ศูนย์ข้อความ</h2>
+        <p class="text-sm text-slate-500 mt-1">พูดคุยระหว่างผู้ซื้อและผู้ขายผ่านระบบของ AgriMarket</p>
+      </div>
+      <button onclick="closeModal('chatCenterModal')" class="w-10 h-10 rounded-xl border border-slate-200 hover:bg-slate-50 grid place-items-center"><i data-lucide="x"></i></button>
+    </div>
+    <div id="chatCenterList" class="max-h-[68vh] overflow-y-auto p-4 space-y-3"></div>
+  </div>
+</div>
+
+<script id="agrimarket-chat-enhancement-js">
+(() => {
+  'use strict';
+
+  const CHAT_STORAGE_KEY = 'agrimarket_chat_threads_v2';
+  const CHAT_READ_KEY = 'agrimarket_chat_reads_v1';
+
+  function safeParse(raw, fallback) {
+    try { return JSON.parse(raw); } catch { return fallback; }
+  }
+
+  function getChatStore() {
+    return safeParse(localStorage.getItem(CHAT_STORAGE_KEY) || '{}', {});
+  }
+
+  function saveChatStore(store) {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(store));
+  }
+
+  function getReadStore() {
+    return safeParse(localStorage.getItem(CHAT_READ_KEY) || '{}', {});
+  }
+
+  function saveReadStore(store) {
+    localStorage.setItem(CHAT_READ_KEY, JSON.stringify(store));
+  }
+
+  function chatUser() {
+    return typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  }
+
+  function sellerIdentity(product) {
+    return String(product?.ownerId || product?.sellerId || `seller:${product?.seller || 'unknown'}`);
+  }
+
+  function conversationKey(product, buyerId) {
+    return `${product.id}::${buyerId}::${sellerIdentity(product)}`;
+  }
+
+  function ensureConversation(product, buyerId) {
+    const store = getChatStore();
+    const key = conversationKey(product, buyerId);
+    if (!store[key]) {
+      store[key] = {
+        key,
+        productId: product.id,
+        productTitle: product.title,
+        productImage: product.image,
+        productProvince: product.province,
+        sellerId: sellerIdentity(product),
+        sellerName: product.seller || 'ผู้ขาย',
+        buyerId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messages: []
+      };
+      saveChatStore(store);
+    }
+    return {store, key, conversation: store[key]};
+  }
+
+  function getConversationListForUser() {
+    const user = chatUser();
+    if (!user) return [];
+    const store = getChatStore();
+    return Object.values(store)
+      .filter(c => c.buyerId === user.id || c.sellerId === user.id)
+      .sort((a,b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+  }
+
+  function otherPartyLabel(conversation, user) {
+    return conversation.sellerId === user.id ? `ผู้ซื้อ ${conversation.buyerName || 'สมาชิก'}` : conversation.sellerName;
+  }
+
+  function unreadCountForConversation(conversation, user) {
+    const reads = getReadStore();
+    const lastRead = reads[`${user.id}::${conversation.key}`] || '';
+    return (conversation.messages || []).filter(m => m.senderId !== user.id && (!lastRead || new Date(m.createdAt) > new Date(lastRead))).length;
+  }
+
+  function markConversationRead(conversation, user) {
+    const reads = getReadStore();
+    reads[`${user.id}::${conversation.key}`] = new Date().toISOString();
+    saveReadStore(reads);
+  }
+
+  function openConversationByKey(key) {
+    const user = chatUser();
+    if (!user) return requireAuthForListing();
+    const store = getChatStore();
+    const conversation = store[key];
+    if (!conversation) return showToast('ไม่พบห้องสนทนา');
+    const product = products.find(p => p.id === conversation.productId);
+    if (product) {
+      openChatEnhanced(product.id, key);
+      return;
+    }
+    openChatConversation(conversation, key);
+  }
+
+  function openChatConversation(conversation, key) {
+    const user = chatUser();
+    if (!user) return;
+    markConversationRead(conversation, user);
+    const avatarName = user.id === conversation.sellerId ? (conversation.buyerName || 'ผู้ซื้อ') : conversation.sellerName;
+    const roleText = user.id === conversation.sellerId ? 'ผู้ซื้อ' : 'ผู้ขาย';
+    document.getElementById('chatSellerAvatar').textContent = (avatarName || 'U').slice(0,1).toUpperCase();
+    document.getElementById('chatSellerName').textContent = `${avatarName} • ${roleText}`;
+    document.getElementById('chatProductTitle').textContent = `${conversation.productTitle} • ${conversation.productProvince || 'ไม่ระบุจังหวัด'}`;
+    const messages = document.getElementById('chatMessages');
+    messages.dataset.chatKey = key;
+    messages.dataset.productId = conversation.productId;
+    const input = document.getElementById('chatInput');
+    input.placeholder = user.id === conversation.sellerId ? 'พิมพ์ข้อความถึงผู้ซื้อ...' : 'พิมพ์ข้อความถึงผู้ขาย...';
+    renderEnhancedChat(conversation);
+    closeModal('detailModal');
+    closeModal('chatCenterModal');
+    openModal('chatModal');
+  }
+
+  function renderEnhancedChat(conversation) {
+    const user = chatUser();
+    const box = document.getElementById('chatMessages');
+    const messages = conversation.messages || [];
+    if (!messages.length) {
+      box.innerHTML = `<div class="py-10 text-center"><div class="w-12 h-12 rounded-2xl bg-green-50 text-farm-700 mx-auto grid place-items-center"><i data-lucide="message-circle"></i></div><div class="font-semibold mt-3">เริ่มการสนทนา</div><div class="text-xs text-slate-500 mt-1">สอบถามราคา สภาพสินค้า การนัดดูสินค้า หรือการจัดส่งได้เลย</div></div>`;
+    } else {
+      box.innerHTML = messages.map(m => {
+        const mine = m.senderId === user.id;
+        const time = new Date(m.createdAt).toLocaleString('th-TH', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+        return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[78%]">
+            <div class="text-[10px] text-slate-400 mb-1 ${mine ? 'text-right':''}">${escapeHtml(m.senderName || (mine ? user.name : 'สมาชิก'))}</div>
+            <div class="px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-farm-600 text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-sm'} whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
+            <div class="text-[10px] text-slate-400 mt-1 ${mine ? 'text-right':''}">${time}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    box.scrollTop = box.scrollHeight;
+    lucide.createIcons();
+  }
+
+  function getOrCreateChatForProduct(product) {
+    const user = chatUser();
+    if (!user) {
+      openModal('loginModal');
+      setAuthError('loginError', 'กรุณาเข้าสู่ระบบก่อนเริ่มสนทนากับผู้ขาย');
+      return null;
+    }
+    const isSeller = String(product.ownerId || product.sellerId || '') === String(user.id);
+    if (isSeller) {
+      const buyers = Object.values(getChatStore()).filter(c => c.productId === product.id && c.sellerId === user.id);
+      if (buyers.length) return { conversation: buyers[0], key: buyers[0].key };
+      showToast('ประกาศของคุณยังไม่มีข้อความจากผู้ซื้อ');
+      return null;
+    }
+    const result = ensureConversation(product, user.id);
+    if (!(result.conversation.messages || []).length) {
+      result.conversation.messages.push({
+        id: `m_${Date.now()}`,
+        senderId: `seller:${product.seller || 'unknown'}`,
+        senderName: product.seller || 'ผู้ขาย',
+        text: `สวัสดีครับ สนใจ ${product.title} สอบถามรายละเอียด ราคา หรือการจัดส่งได้เลยครับ`,
+        createdAt: new Date().toISOString()
+      });
+      result.conversation.updatedAt = new Date().toISOString();
+      saveChatStore(result.store);
+    }
+    return {conversation: result.conversation, key: result.key};
+  }
+
+  window.openChatEnhanced = function(id, forcedKey=null) {
+    const product = products.find(x => x.id === Number(id));
+    if (!product) return showToast('ไม่พบประกาศนี้');
+    let key = forcedKey;
+    let conversation = null;
+    if (key) conversation = getChatStore()[key];
+    else {
+      const result = getOrCreateChatForProduct(product);
+      if (!result) return;
+      conversation = result.conversation;
+      key = result.key;
+    }
+    openChatConversation(conversation, key);
+  };
+
+  window.openChat = window.openChatEnhanced;
+
+  window.sendChatMessage = function(e) {
+    e.preventDefault();
+    const user = chatUser();
+    if (!user) {
+      closeModal('chatModal');
+      openModal('loginModal');
+      setAuthError('loginError', 'กรุณาเข้าสู่ระบบเพื่อส่งข้อความ');
+      return;
+    }
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    const key = document.getElementById('chatMessages').dataset.chatKey;
+    if (!text || !key) return;
+    const store = getChatStore();
+    const conversation = store[key];
+    if (!conversation) return showToast('ไม่พบห้องสนทนา');
+    conversation.messages = conversation.messages || [];
+    conversation.messages.push({
+      id: `m_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+      senderId: user.id,
+      senderName: user.name,
+      text,
+      createdAt: new Date().toISOString()
+    });
+    conversation.updatedAt = new Date().toISOString();
+    saveChatStore(store);
+    input.value = '';
+    renderEnhancedChat(conversation);
+    updateChatBadge();
+  };
+
+  window.openChatCenter = function() {
+    const user = chatUser();
+    if (!user) {
+      openModal('loginModal');
+      setAuthError('loginError', 'กรุณาเข้าสู่ระบบเพื่อดูข้อความของคุณ');
+      return;
+    }
+    const list = document.getElementById('chatCenterList');
+    const items = getConversationListForUser();
+    if (!items.length) {
+      list.innerHTML = `<div class="py-16 text-center text-sm text-slate-500"><div class="w-14 h-14 rounded-2xl bg-slate-100 mx-auto grid place-items-center"><i data-lucide="messages-square" class="w-6 h-6"></i></div><div class="font-semibold text-slate-700 mt-4">ยังไม่มีการสนทนา</div><div class="mt-1">เปิดประกาศสินค้าแล้วกด “แชตกับผู้ขาย” เพื่อเริ่มพูดคุย</div></div>`;
+    } else {
+      list.innerHTML = items.map(c => {
+        const unread = unreadCountForConversation(c, user);
+        const last = (c.messages || []).slice(-1)[0];
+        const other = otherPartyLabel(c, user);
+        return `<button onclick="openConversationByKey('${c.key.replace(/'/g, "\\'")}')" class="chat-conversation w-full text-left p-4 rounded-2xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-3">
+          <img src="${c.productImage || ''}" onerror="this.style.display='none'" class="w-14 h-14 rounded-xl object-cover bg-slate-100 shrink-0">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-3"><div class="font-semibold truncate">${escapeHtml(c.productTitle)}</div>${unread ? `<span class="min-w-5 h-5 px-1.5 rounded-full bg-farm-600 text-white text-[10px] font-bold grid place-items-center chat-unread-dot">${unread}</span>`:''}</div>
+            <div class="text-xs text-slate-500 mt-1">${escapeHtml(other)} • ${escapeHtml(c.productProvince || 'ไม่ระบุจังหวัด')}</div>
+            <div class="text-xs text-slate-400 mt-1 truncate">${escapeHtml(last?.text || 'ยังไม่มีข้อความ')}</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 shrink-0"></i>
+        </button>`;
+      }).join('');
+    }
+    openModal('chatCenterModal');
+    lucide.createIcons();
+    updateChatBadge();
+  };
+
+  window.openConversationByKey = openConversationByKey;
+
+  window.updateChatBadge = function() {
+    const user = chatUser();
+    const badge = document.getElementById('chatCenterCount');
+    if (!badge) return;
+    const count = user ? getConversationListForUser().reduce((sum,c) => sum + unreadCountForConversation(c,user), 0) : 0;
+    badge.textContent = count;
+    badge.classList.toggle('hidden', count === 0);
+    badge.classList.toggle('flex', count > 0);
+  };
+
+  // Replace the simple legacy chat opener so every chat uses the persisted conversation system.
+  window.addEventListener('load', () => {
+    const authArea = document.getElementById('authArea');
+    if (authArea && !document.getElementById('chatCenterButton')) {
+      const btn = document.createElement('button');
+      btn.id = 'chatCenterButton';
+      btn.type = 'button';
+      btn.onclick = () => openChatCenter();
+      btn.className = 'relative w-10 h-10 rounded-xl bg-slate-100 hover:bg-green-50 text-slate-600 hover:text-farm-700 grid place-items-center transition';
+      btn.title = 'ข้อความของฉัน';
+      btn.innerHTML = '<i data-lucide="messages-square" class="w-5 h-5"></i><span id="chatCenterCount" class="absolute -top-1 -right-1 hidden min-w-4 h-4 px-1 rounded-full bg-farm-600 text-white text-[9px] font-bold items-center justify-center">0</span>';
+      const loginBtn = document.getElementById('loginButton');
+      authArea.insertBefore(btn, loginBtn || authArea.firstChild);
+    }
+    updateChatBadge();
+    lucide.createIcons();
+  });
+})();
+</script>
+
 </body>
 </html>
